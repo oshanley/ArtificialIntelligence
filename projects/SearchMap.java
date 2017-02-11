@@ -5,6 +5,8 @@ public class SearchMap{
 
     ArrayList<String> searchAlgs;
     ArrayList<File> maps;
+    ArrayList<String> heuristics;
+
 
     private class Space {
         private char symbol;
@@ -64,7 +66,6 @@ public class SearchMap{
         if (curRow > 0){
             Space up = map[curRow-1][curCol];
             if(!(up.symbol() == '#') && !up.hasBeenVisited()){
-                System.out.println("Up is valid: (" + up.getRow() + "," + up.getCol() + ")");
 
                 validMoves.add(up);
                 up.visited = true;
@@ -73,7 +74,6 @@ public class SearchMap{
         if(curRow < map.length-1){
             Space down = map[curRow+1][curCol];
             if(!(down.symbol() == '#') && !down.hasBeenVisited()){
-                System.out.println("Down is valid: (" + down.getRow() + "," + down.getCol() + ")");
 
                 validMoves.add(down);
                 down.visited = true;
@@ -82,7 +82,6 @@ public class SearchMap{
         if(curCol > 0){
             Space left = map[curRow][curCol-1];
             if(!(left.symbol() == '#') && !left.hasBeenVisited()){
-                System.out.println("Left is valid: (" + left.getRow() + "," + left.getCol() + ")");
 
                 validMoves.add(left);
                 left.visited = true;
@@ -91,7 +90,6 @@ public class SearchMap{
         if(curCol < map[0].length-1){
             Space right = map[curRow][curCol+1];
             if(!(right.symbol() == '#') && !right.hasBeenVisited()){
-                System.out.println("Right is valid: (" + right.getRow() + "," + (right.getCol()) + ")");
 
                 validMoves.add(right);
                 right.visited = true;
@@ -101,17 +99,16 @@ public class SearchMap{
         return validMoves;
     }
 
-    private void breadthFirstSearch(Space[][] map){
-        Queue <Space> frontier = new LinkedList<Space>();
+    private void depthFirstSearch(Space[][] map){
+        Deque<Space> frontier = new ArrayDeque<Space>();
         int [] start = findStart(map);
-
-        System.out.println("Start row: " + start[0] + " col: " + start[1]);
 
         boolean goal = false;
         int row = start[0];
         int col = start[1];
 
         Space startSpace = map[row][col];
+
         frontier.add(startSpace);
         startSpace.visited = true;
 
@@ -119,19 +116,14 @@ public class SearchMap{
             Space curSpace = frontier.peek();
             row = curSpace.getRow();
             col =  curSpace.getCol();
-            //System.out.println("Current space: (" + row + "," + col + ")");
 
             ArrayList <Space> validMoves = validNeighbors(map, row, col);
-            //System.out.println("Adding to frontier: ");
 
             for (Space sp : validMoves ) {
-                System.out.println("(" + sp.getRow() + "," + sp.getCol() + ")");
                 frontier.add(sp);
             }
 
             Space rm = frontier.remove();
-            //System.out.println("Checking if  to frontier: (" + rm.getRow() + "," + rm.getCol() + ") is goal.");
-            //System.out.println("Symbol is: " + rm.symbol());
 
             if (rm.symbol() == 'g') {
                 goal = true;
@@ -142,23 +134,46 @@ public class SearchMap{
                     System.out.println("This grid has no solution. Exiting.");
                     return;
                 }
-                //System.out.println("Next to evaluate: (" + frontier.peek().getRow() + "," + frontier.peek().getCol() + ")");
+            }
+        }
 
+    }
 
-                // if (row < map.length-1){
-                //     if (col == map[0].length){
-                //         col = 0;
-                //         row++;
-                //     }
-                //     else{
-                //         col++;
-                //         row++;
-                //     }
-                // }
-                // else{
-                //     System.out.println("This grid has no solution. Exiting.");
-                //     return;
-                // }
+    private void breadthFirstSearch(Space[][] map){
+        Queue <Space> frontier = new LinkedList<Space>();
+        int [] start = findStart(map);
+
+        boolean goal = false;
+        int row = start[0];
+        int col = start[1];
+
+        Space startSpace = map[row][col];
+
+        frontier.add(startSpace);
+        startSpace.visited = true;
+
+        while (!goal){
+            Space curSpace = frontier.peek();
+            row = curSpace.getRow();
+            col =  curSpace.getCol();
+
+            ArrayList <Space> validMoves = validNeighbors(map, row, col);
+
+            for (Space sp : validMoves ) {
+                frontier.add(sp);
+            }
+
+            Space rm = frontier.remove();
+
+            if (rm.symbol() == 'g') {
+                goal = true;
+                System.out.println("GOAL FOUND AT: (" + row + "," + col + ")");
+            }
+            else{
+                if (frontier.peek() == null){
+                    System.out.println("This grid has no solution. Exiting.");
+                    return;
+                }
             }
         }
 
@@ -254,19 +269,46 @@ public class SearchMap{
         return new File(userInput);
     }
 
+    private String getHeuristic(){
+        String userInput;
+        System.out.println("\nPlease enter a search heuristic for A*. Valid options are: \n");
+
+        for(String a : heuristics){
+            System.out.println(a + "\t");
+        }
+
+        System.out.println("\nChoice: ");
+        userInput = System.console().readLine();
+        System.out.println("\nYou selected: " + userInput + "\n");
+
+        while (!heuristics.contains(userInput)){
+            System.out.println("Invalid option. Please choose again: \n");
+
+            userInput = System.console().readLine();
+        }
+        return userInput;
+    }
+
     public SearchMap() {
         searchAlgs = new ArrayList<>(Arrays.asList("DFS", "BFS", "A*"));
         maps = new ArrayList<File>(Arrays.asList(new File("./maps").listFiles()));
+        heuristics = new ArrayList<>(Arrays.asList("distance", "cost"));
     }
 
     public static void main(String[] args) {
         SearchMap search = new SearchMap();
         String searchType = search.promptForAlg();
+
+        if (searchType.equals("A*")){
+            String heuristic = search.getHeuristic();
+        }
+
         File mapFile = search.chooseMap();
         Space[][] map = search.parseMap(mapFile);
 
         switch (searchType) {
             case "DFS":
+            search.depthFirstSearch(map);
                 break;
             case "BFS":
                 search.breadthFirstSearch(map);
