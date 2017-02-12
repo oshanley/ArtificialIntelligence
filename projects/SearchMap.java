@@ -1,3 +1,20 @@
+/* Olivia Shanley
+CSC 380 Artificial Intelligence
+Project 1 - Search
+Dr. Salgian, The College of New Jersey
+
+This purpose of this program is to implement Depth-First, Breadth-First, and A*
+search algorithms. The user is prompted to choose the algorithm and map for their
+search (as well as from two heuristics for A* Search), and the coordinates to
+the respective path are printed.
+
+The main elements of the code are as follows:
+1) User prompting and input parsing, as well as map display
+2) The Space class, which holds information about a space in the grid
+3) The three search algorithms
+4) Helper methods for finding the starting position and all of the valid potential
+moves one path could take next */
+
 import java.util.*;
 import java.io.*;
 
@@ -7,18 +24,22 @@ public class SearchMap{
     ArrayList<File> maps;
     ArrayList<String> heuristics;
 
-
     private class Space {
         private char symbol;
         private int cost;
         private boolean visited = false;
         private int[] coords;
+        private Space parent;
 
         private Space (char symbol, int[] coords, int cost, boolean beenVisited){
             this.symbol = symbol;
             this.coords = coords;
             this.cost = cost;
             this.visited = beenVisited;
+        }
+
+        public void setParent(Space parent){
+            this.parent = parent;
         }
 
         public void visited(boolean update){
@@ -45,6 +66,14 @@ public class SearchMap{
             return cost;
         }
 
+        public void updateCost(int addCost){
+            this.cost += addCost;
+        }
+
+        public Space parent(){
+            return parent;
+        }
+
     }
 
     private int[] findStart(Space[][] map){
@@ -60,12 +89,35 @@ public class SearchMap{
         return startCoords;
     }
 
-    private ArrayList<Space> validNeighbors(Space[][] map, int curRow, int curCol){
+    private void printPath(Space goalSpace){
+        Deque<Space> path = new ArrayDeque<Space>();
+
+        Space temp = goalSpace;
+        while (temp.parent() != null){
+            path.push(temp);
+            temp = temp.parent();
+        }
+        path.push(temp);
+
+        System.out.println("Path to goal: \t");
+
+        while(path.peek()!=null){
+            temp = path.pop();
+            System.out.println("(" + temp.getRow() + "," + temp.getCol() + ")\t");
+        }
+
+    }
+
+    private ArrayList<Space> validNeighbors(Space[][] map, Space parent, int curRow, int curCol){
         ArrayList<Space> validMoves = new ArrayList<Space>();
+
+        //check bounds, then determine if a neighbor is valid
+        //if so, set parent connecion to current space and set visited to true
 
         if (curRow > 0){
             Space up = map[curRow-1][curCol];
             if(!(up.symbol() == '#') && !up.hasBeenVisited()){
+                up.setParent(parent);
 
                 validMoves.add(up);
                 up.visited = true;
@@ -74,6 +126,7 @@ public class SearchMap{
         if(curRow < map.length-1){
             Space down = map[curRow+1][curCol];
             if(!(down.symbol() == '#') && !down.hasBeenVisited()){
+                down.setParent(parent);
 
                 validMoves.add(down);
                 down.visited = true;
@@ -82,6 +135,7 @@ public class SearchMap{
         if(curCol > 0){
             Space left = map[curRow][curCol-1];
             if(!(left.symbol() == '#') && !left.hasBeenVisited()){
+                left.setParent(parent);
 
                 validMoves.add(left);
                 left.visited = true;
@@ -90,6 +144,7 @@ public class SearchMap{
         if(curCol < map[0].length-1){
             Space right = map[curRow][curCol+1];
             if(!(right.symbol() == '#') && !right.hasBeenVisited()){
+                right.setParent(parent);
 
                 validMoves.add(right);
                 right.visited = true;
@@ -99,75 +154,100 @@ public class SearchMap{
         return validMoves;
     }
 
-    private void depthFirstSearch(Space[][] map){
-        Deque<Space> frontier = new ArrayDeque<Space>();
+    private void aStar(Space[][] map){
         int [] start = findStart(map);
+        boolean goal = false;
+        int row = start[0];
+        int col = start[1];
+        int minCost = 0;
+        Space startSpace = map[row][col];
+        
+        while(!goal){
+            ArrayList <Space> validMoves = validNeighbors(map, curSpace, row, col);
+            int curCost = curSpace.cost();
 
+            for (Space sp : validMoves ) {
+                sp.updateCost(curCost);
+            }
+
+        }
+    }
+
+    private void depthFirstSearch(Space[][] map){
+        Stack<Space> frontier = new Stack<Space>();
+        int [] start = findStart(map);
         boolean goal = false;
         int row = start[0];
         int col = start[1];
 
         Space startSpace = map[row][col];
-
-        frontier.add(startSpace);
         startSpace.visited = true;
+        //push start to frontier
+        frontier.push(startSpace);
 
         while (!goal){
-            Space curSpace = frontier.peek();
+            //if frontier is empty, grid has no path to goal
+            if(frontier.empty()){
+                System.out.println("This grid has no solution. Exiting.");
+                return;
+            }
+
+            //pop Space off the stack
+            Space curSpace = frontier.pop();
             row = curSpace.getRow();
             col =  curSpace.getCol();
 
-            ArrayList <Space> validMoves = validNeighbors(map, row, col);
-
-            for (Space sp : validMoves ) {
-                frontier.add(sp);
-            }
-
-            Space rm = frontier.remove();
-
-            if (rm.symbol() == 'g') {
+            //check for goal
+            if (curSpace.symbol() == 'g') {
                 goal = true;
-                System.out.println("GOAL FOUND AT: (" + row + "," + col + ")");
+                printPath(curSpace);
             }
             else{
-                if (frontier.peek() == null){
-                    System.out.println("This grid has no solution. Exiting.");
-                    return;
+
+                //get list of valid adjacent moves
+                ArrayList <Space> validMoves = validNeighbors(map, curSpace, row, col);
+
+                //add to frontier
+                for (Space sp : validMoves ) {
+                    frontier.push(sp);
                 }
             }
         }
-
     }
 
     private void breadthFirstSearch(Space[][] map){
+
         Queue <Space> frontier = new LinkedList<Space>();
         int [] start = findStart(map);
-
         boolean goal = false;
         int row = start[0];
         int col = start[1];
 
         Space startSpace = map[row][col];
-
-        frontier.add(startSpace);
         startSpace.visited = true;
+        //add start to front
+        frontier.add(startSpace);
 
         while (!goal){
             Space curSpace = frontier.peek();
             row = curSpace.getRow();
             col =  curSpace.getCol();
 
-            ArrayList <Space> validMoves = validNeighbors(map, row, col);
+            //get list of valid adjacent moves
+            ArrayList <Space> validMoves = validNeighbors(map, curSpace, row, col);
 
+            //add to frontier
             for (Space sp : validMoves ) {
                 frontier.add(sp);
             }
 
+            //remove oldest Space from frontier
             Space rm = frontier.remove();
 
+            //check if goals
             if (rm.symbol() == 'g') {
                 goal = true;
-                System.out.println("GOAL FOUND AT: (" + row + "," + col + ")");
+                printPath(rm);
             }
             else{
                 if (frontier.peek() == null){
@@ -186,17 +266,27 @@ public class SearchMap{
             BufferedReader br = new BufferedReader(fr); //buffer input
             String[] dimensions = br.readLine().split("\\s"); //read first line
 
-            //read dimensions
+            //read dimensions from first line
             int colSize = Integer.parseInt(dimensions[0]);
             int rowSize = Integer.parseInt(dimensions[1]);
             map = new Space[rowSize][colSize];
 
             int row = 0;
             int col = 0;
-            String line;
+            String line = "";
+            int i = 0;
 
+            //display matrix
+            for(i=0; i < colSize; i++)
+            System.out.print("   " + i);
+
+            System.out.println();
+
+            //parse a row of the map at a time
             while((line = br.readLine()) != null){
+                System.out.print(row + " ");
                 for(char c : line.toCharArray()){
+                    //set attributes of each space
                     int cost = 1;
                     if (c == '#') {
                         cost = 0;
