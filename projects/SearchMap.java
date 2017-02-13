@@ -17,6 +17,7 @@ moves one path could take next */
 
 import java.util.*;
 import java.io.*;
+import java.util.concurrent.*;
 
 public class SearchMap{
 
@@ -27,6 +28,7 @@ public class SearchMap{
     private class Space {
         private char symbol;
         private int cost;
+        private int costFromStart;
         private boolean visited = false;
         private int[] coords;
         private Space parent;
@@ -36,6 +38,8 @@ public class SearchMap{
             this.coords = coords;
             this.cost = cost;
             this.visited = beenVisited;
+            this.costFromStart = 0;
+            this.parent = null;
         }
 
         public void setParent(Space parent){
@@ -66,8 +70,11 @@ public class SearchMap{
             return cost;
         }
 
-        public void updateCost(int addCost){
-            this.cost += addCost;
+        public int costFromStart(){
+            return costFromStart;
+        }
+        public void updatePathCost(int addCost){
+            this.costFromStart += addCost;
         }
 
         public Space parent(){
@@ -76,11 +83,11 @@ public class SearchMap{
 
     }
 
-    private int[] findStart(Space[][] map){
+    private int[] findSymbol(Space[][] map, char symbol){
         int[] startCoords = new int[2];
         for (int row = 0; row < map.length; row++) {
             for (int col=0; col < map[0].length; col++) {
-                if (map[row][col].symbol() == 's'){
+                if (map[row][col].symbol() == symbol){
                     startCoords[0] = row;
                     startCoords[1] = col;
                 }
@@ -93,13 +100,11 @@ public class SearchMap{
         Stack<Space> path = new Stack<Space>();
         int cost = 0;
         Space temp = goalSpace;
-        //System.out.println("Goal space: (" + goalSpace.getRow() + "," + goalSpace.getCol() + ")");
 
         while (temp.parent() != null){
             cost += temp.cost();
             path.push(temp);
             temp = temp.parent();
-            //System.out.println("Parent: (" + temp.getRow() + "," + temp.getCol() + ")");
 
         }
         path.push(temp);
@@ -161,42 +166,49 @@ public class SearchMap{
     }
 
     private class costComparator implements Comparator<Space>{
+        int estimatedPath;
+
 
         @Override
         public int compare(Space space1, Space space2){
-            if(space1.cost() < space2.cost()){
+            if((space1.costFromStart() + 1) < (space2.costFromStart() + 1)){
                 return -1;
             }
-            else if(space1.cost() > space2.cost())
+            else if((space1.costFromStart() + 1) > (space2.costFromStart() + 1))
                 return 1;
             else return 0;
         }
     }
 
-    private void aStarCost(Space[][] map){
+    private void aStarPath(Space[][] map){
+
         //Initialize priority queue to order Spaces by cost
         Comparator<Space> comparator = new costComparator();
         PriorityQueue<Space> frontier = new PriorityQueue<Space>(11,comparator);
 
         //set start coordinates
-        int [] start = findStart(map);
+        int [] start = findSymbol(map, 's');
         int row = start[0];
         int col = start[1];
-        int curCost = 0;
+        int nodesExpanded = 0;
 
-        //add startSpace to frontier and makr visited
+        //add startSpace to frontier and mark visited
         Space startSpace = map[row][col];
         frontier.add(startSpace);
+        int curCost = startSpace.cost();
         startSpace.visited = true;
 
         while(frontier.peek()!=null){
             Space curSpace = frontier.poll();
+            nodesExpanded++;
+
             if(curSpace.symbol() == 'g'){
                 printPath(curSpace);
+                System.out.println("Nodes expanded: " + nodesExpanded);
                 return;
             }
 
-            curCost = curSpace.cost();
+            curCost = curSpace.costFromStart();
             row = curSpace.getRow();
             col =  curSpace.getCol();
 
@@ -206,17 +218,68 @@ public class SearchMap{
             //add to frontier
             for (Space sp : validMoves ) {
 
-                sp.updateCost(curCost);
+                //add one to total path length
+                sp.updatePathCost(1);
                 frontier.add(sp);
             }
         }
+        System.out.println("Nodes expanded: " + nodesExpanded);
+        System.out.println("This grid has no solution. Exiting.");
+        return;
+    }
+
+    private void aStarCost(Space[][] map){
+
+        //Initialize priority queue to order Spaces by cost
+        Comparator<Space> comparator = new costComparator();
+        PriorityQueue<Space> frontier = new PriorityQueue<Space>(11,comparator);
+
+        //set start coordinates
+        int [] start = findSymbol(map, 's');
+        int row = start[0];
+        int col = start[1];
+        int nodesExpanded = 0;
+
+        //add startSpace to frontier and mark visited
+        Space startSpace = map[row][col];
+        frontier.add(startSpace);
+        int curCost = startSpace.cost();
+        startSpace.visited = true;
+
+        while(frontier.peek()!=null){
+            Space curSpace = frontier.poll();
+            nodesExpanded++;
+
+            if(curSpace.symbol() == 'g'){
+                printPath(curSpace);
+                System.out.println("Nodes expanded: " + nodesExpanded);
+                return;
+            }
+
+            curCost = curSpace.costFromStart();
+            row = curSpace.getRow();
+            col =  curSpace.getCol();
+
+            //get list of valid adjacent moves
+            ArrayList <Space> validMoves = validNeighbors(map, curSpace, row, col);
+
+            //add to frontier
+            for (Space sp : validMoves ) {
+
+                //add one to total path length
+                sp.updatePathCost(curSpace.cost());
+                frontier.add(sp);
+            }
+        }
+        System.out.println("Nodes expanded: " + nodesExpanded);
         System.out.println("This grid has no solution. Exiting.");
         return;
     }
 
     private void depthFirstSearch(Space[][] map){
         Stack<Space> frontier = new Stack<Space>();
-        int [] start = findStart(map);
+        int nodesExpanded = 0;
+        int [] start = findSymbol(map, 's');
         boolean goal = false;
         int row = start[0];
         int col = start[1];
@@ -229,12 +292,14 @@ public class SearchMap{
         while (!goal){
             //if frontier is empty, grid has no path to goal
             if(frontier.empty()){
+                System.out.println("Nodes expanded: " + nodesExpanded);
                 System.out.println("This grid has no solution. Exiting.");
                 return;
             }
 
             //pop Space off the stack
             Space curSpace = frontier.pop();
+            nodesExpanded++;
             row = curSpace.getRow();
             col =  curSpace.getCol();
 
@@ -254,15 +319,17 @@ public class SearchMap{
                 }
             }
         }
+        System.out.println("Nodes expanded: " + nodesExpanded);
     }
 
     private void breadthFirstSearch(Space[][] map){
 
         Queue <Space> frontier = new LinkedList<Space>();
-        int [] start = findStart(map);
+        int [] start = findSymbol(map, 's');
         boolean goal = false;
         int row = start[0];
         int col = start[1];
+        int nodesExpanded = 0;
 
         Space startSpace = map[row][col];
         startSpace.visited = true;
@@ -284,20 +351,22 @@ public class SearchMap{
 
             //remove oldest Space from frontier
             Space rm = frontier.remove();
+            nodesExpanded++;
 
             //check if goals
             if (rm.symbol() == 'g') {
                 goal = true;
+                System.out.println("Nodes expanded: " + nodesExpanded);
                 printPath(rm);
             }
             else{
                 if (frontier.peek() == null){
+                    System.out.println("Nodes expanded: " + nodesExpanded);
                     System.out.println("This grid has no solution. Exiting.");
                     return;
                 }
             }
         }
-
     }
 
     private Space[][] parseMap(File file){
@@ -323,7 +392,7 @@ public class SearchMap{
 
             System.out.println();
 
-            //parse a row of the map at a time
+            //print one row at a time
             while((line = br.readLine()) != null){
                 System.out.print(row + " ");
                 for(char c : line.toCharArray()){
@@ -430,11 +499,13 @@ public class SearchMap{
     }
 
     public static void main(String[] args) {
+        long startTime = 0;
+        long elapsedTime = 0;
         SearchMap search = new SearchMap();
         String searchType = search.promptForAlg();
-
+        String heuristic = " ";
         if (searchType.equals("A*")){
-            String heuristic = search.getHeuristic();
+            heuristic = search.getHeuristic();
         }
 
         File mapFile = search.chooseMap();
@@ -442,13 +513,32 @@ public class SearchMap{
 
         switch (searchType) {
             case "DFS":
-            search.depthFirstSearch(map);
+                startTime = System.nanoTime();
+                search.depthFirstSearch(map);
+                elapsedTime = System.nanoTime() - startTime;
+                elapsedTime = TimeUnit.MILLISECONDS.convert(elapsedTime, TimeUnit.NANOSECONDS);
+                System.out.println("Elapsed time: " + elapsedTime + "ms");
                 break;
+
             case "BFS":
+                startTime = System.nanoTime();
                 search.breadthFirstSearch(map);
+                elapsedTime = System.nanoTime() - startTime;
+                elapsedTime = TimeUnit.MILLISECONDS.convert(elapsedTime, TimeUnit.NANOSECONDS);
+                System.out.println("Elapsed time: " + elapsedTime + "ms");
                 break;
+
             case "A*":
-                search.aStarCost(map);
+                startTime = System.nanoTime();
+
+                if (heuristic.equals("cost"))
+                    search.aStarCost(map);
+                else if (heuristic.equals("distance"));
+                    search.aStarPath(map);
+
+                elapsedTime = System.nanoTime() - startTime;
+                elapsedTime = TimeUnit.MILLISECONDS.convert(elapsedTime, TimeUnit.NANOSECONDS);
+                System.out.println("Elapsed time: " + elapsedTime + "ms");
                 break;
         }
     }
