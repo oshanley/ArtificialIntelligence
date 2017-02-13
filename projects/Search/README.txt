@@ -5,7 +5,7 @@ Project I - Search
 List of Files:
 
 ./maps/ - Folder that contains maps 1-8. This folder needs to be in your directory for the program to work.
-SearchMap.java - prompts user for search method, the map desired to search, and the heuristic for A* search
+SearchMap.java - Executes the desired search algorithm. It prompts user for the search method, map to search, and the heuristic (either distance or cost) to use for the A* search, if chosen.
 
 To use:
 
