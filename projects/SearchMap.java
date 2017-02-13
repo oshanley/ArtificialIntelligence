@@ -90,22 +90,28 @@ public class SearchMap{
     }
 
     private void printPath(Space goalSpace){
-        Deque<Space> path = new ArrayDeque<Space>();
-
+        Stack<Space> path = new Stack<Space>();
+        int cost = 0;
         Space temp = goalSpace;
+        //System.out.println("Goal space: (" + goalSpace.getRow() + "," + goalSpace.getCol() + ")");
+
         while (temp.parent() != null){
+            cost += temp.cost();
             path.push(temp);
             temp = temp.parent();
+            //System.out.println("Parent: (" + temp.getRow() + "," + temp.getCol() + ")");
+
         }
         path.push(temp);
+        cost+= temp.cost();
 
         System.out.println("Path to goal: \t");
 
-        while(path.peek()!=null){
+        while(!path.empty()){
             temp = path.pop();
             System.out.println("(" + temp.getRow() + "," + temp.getCol() + ")\t");
         }
-
+        System.out.println("Total cost of goal: " + cost);
     }
 
     private ArrayList<Space> validNeighbors(Space[][] map, Space parent, int curRow, int curCol){
@@ -154,23 +160,58 @@ public class SearchMap{
         return validMoves;
     }
 
-    private void aStar(Space[][] map){
+    private class costComparator implements Comparator<Space>{
+
+        @Override
+        public int compare(Space space1, Space space2){
+            if(space1.cost() < space2.cost()){
+                return -1;
+            }
+            else if(space1.cost() > space2.cost())
+                return 1;
+            else return 0;
+        }
+    }
+
+    private void aStarCost(Space[][] map){
+        //Initialize priority queue to order Spaces by cost
+        Comparator<Space> comparator = new costComparator();
+        PriorityQueue<Space> frontier = new PriorityQueue<Space>(11,comparator);
+
+        //set start coordinates
         int [] start = findStart(map);
-        boolean goal = false;
         int row = start[0];
         int col = start[1];
-        int minCost = 0;
-        Space startSpace = map[row][col];
-        
-        while(!goal){
-            ArrayList <Space> validMoves = validNeighbors(map, curSpace, row, col);
-            int curCost = curSpace.cost();
+        int curCost = 0;
 
-            for (Space sp : validMoves ) {
-                sp.updateCost(curCost);
+        //add startSpace to frontier and makr visited
+        Space startSpace = map[row][col];
+        frontier.add(startSpace);
+        startSpace.visited = true;
+
+        while(frontier.peek()!=null){
+            Space curSpace = frontier.poll();
+            if(curSpace.symbol() == 'g'){
+                printPath(curSpace);
+                return;
             }
 
+            curCost = curSpace.cost();
+            row = curSpace.getRow();
+            col =  curSpace.getCol();
+
+            //get list of valid adjacent moves
+            ArrayList <Space> validMoves = validNeighbors(map, curSpace, row, col);
+
+            //add to frontier
+            for (Space sp : validMoves ) {
+
+                sp.updateCost(curCost);
+                frontier.add(sp);
+            }
         }
+        System.out.println("This grid has no solution. Exiting.");
+        return;
     }
 
     private void depthFirstSearch(Space[][] map){
@@ -297,6 +338,9 @@ public class SearchMap{
                     else if (c == ','){
                         cost = 2;
                     }
+                    else if (c == 's') {
+                        cost = 0;
+                    }
                     int[] coords = new int[2];
                     coords[0] = row;
                     coords[1] = col;
@@ -404,6 +448,7 @@ public class SearchMap{
                 search.breadthFirstSearch(map);
                 break;
             case "A*":
+                search.aStarCost(map);
                 break;
         }
     }
