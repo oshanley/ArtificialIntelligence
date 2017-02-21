@@ -166,8 +166,6 @@ public class SearchMap{
     }
 
     private class costComparator implements Comparator<Space>{
-        int estimatedPath;
-
 
         @Override
         public int compare(Space space1, Space space2){
