@@ -12,68 +12,35 @@ public class Game {
 	ArrayList<File> boards;
 	ArrayList<String> agents;
 
-	//valid neighbors to be used for blitz
-	// private ArrayList<Space> validNeighbors(Space[][] map, Space curSpace, int curRow, int curCol){
-    //     ArrayList<Space> validMoves = new ArrayList<Space>();
-	//
-    //     //check bounds, then determine if a neighbor is valid
-    //     //if so, set previousMove connecion to current space and set visited to true
-	//
-    //     if (curRow > 0){
-    //         Space up = map[curRow-1][curCol];
-    //         if(!(up.isOccupied())){
-    //             up.setPreviousMove(curSpace);
-	//
-    //             validMoves.add(up);
-    //         }
-    //     }
-    //     if(curRow < map.length-1){
-    //         Space down = map[curRow+1][curCol];
-    //         if(!(down.isOccupied())){
-    //             down.setPreviousMove(curSpace);
-	//
-    //             validMoves.add(down);
-    //         }
-    //     }
-    //     if(curCol > 0){
-    //         Space left = map[curRow][curCol-1];
-    //         if(!(left.isOccupied())){
-    //             left.setPreviousMove(curSpace);
-	//
-    //             validMoves.add(left);
-    //         }
-    //     }
-    //     if(curCol < map[0].length-1){
-    //         Space right = map[curRow][curCol+1];
-    //         if(!(right.isOccupied())){
-    //             right.setPreviousMove(curSpace);
-	//
-    //             validMoves.add(right);
-    //         }
-    //     }
-	//
-    //     return validMoves;
-    // }
-
-	private void playGame(Board board, Player greenPlayer, Player bluePlayer){
+	private void playGame(Board board, Player p1, Player p2){
 		boolean gameOver = false;
-		Player curPlayer = greenPlayer;
+		Player curPlayer = p1;
 		Space[][] map = board.getBoard();
 
 		while(!gameOver){
 			if (board.remainingMoves().size() == 0){
 				System.out.println("No remaining moves. Game over");
+				if (p1.getScore() > p2.getScore())
+					System.out.println("Player 1 wins");
+				else if (p1.getScore() < p2.getScore())
+					System.out.println("Player 2 wins");
+				else
+					System.out.println("It's a tie!");
+
 				gameOver = true;
 			}
 			else{
+
+				System.out.println("Remaining spaces: " + board.remainingMoves().size());
 				//make move depending on play method
 				switch (curPlayer.playMethod()) {
 					case "minimax":
 						break;
 
 					case "random":
-						RandomPlayer randP = new RandomPlayer();
-						randP.makeMove();
+						curPlayer.makeRandomMove(board);
+						System.out.println("Player new score: " + curPlayer.getScore());
+						System.out.println();
 						break;
 
 					case "AB":
@@ -81,13 +48,13 @@ public class Game {
 				}
 
 				//switch Player
-				if (curPlayer.equals(greenPlayer)){
+				if (curPlayer.equals(p1)){
 					System.out.println("Player 2's turn");
-					curPlayer = bluePlayer;
+					curPlayer = p2;
 				}
-				else if (curPlayer.equals(bluePlayer)){
+				else if (curPlayer.equals(p2)){
 					System.out.println("Player 1's turn");
-					curPlayer = greenPlayer;
+					curPlayer = p1;
 				}
 			}
 		}
@@ -176,24 +143,30 @@ public class Game {
 
 		File boardChoice = war.chooseBoard();
 		Board board = new Board(boardChoice);
-
+		Player p1, p2;
 
 		//Intiialize players
+
+		//Player 1 (green)
 		System.out.println("----------------------------------------------------");
 		System.out.println("Player One:");
 		String playerOneType = war.choosePlayerType();
-		Player greenPlayer = new Player(playerOneType);
+
+		p1 = new Player(playerOneType);
 
 		System.out.println("----------------------------------------------------");
+
+		//Player 2 (Blue)
 		System.out.println("Player Two:");
 		String playerTwoType = war.choosePlayerType();
-		Player bluePlayer = new Player(playerTwoType);
+		p2 = new Player(playerTwoType);
+
 		System.out.println("----------------------------------------------------");
 		System.out.println();
 
 		//Initialize board
 		Space[][] map = board.getBoard();
-		war.playGame(board, greenPlayer, bluePlayer);
+		war.playGame(board, p1, p2);
 	}
 
 }

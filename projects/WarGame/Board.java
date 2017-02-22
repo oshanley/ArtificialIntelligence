@@ -2,16 +2,10 @@ import java.util.*;
 import java.io.*;
 
 public class Board{
-    int remainingSpaces;
-    Space[][] map;
+    private Space[][] map;
 
     public Board(File boardChoice){
         this.map = parseMap(boardChoice);
-        this.remainingSpaces = remainingMoves().size();
-    }
-
-    public Space[][] getBoard(){
-        return this.map;
     }
 
     public Space[][] parseMap(File file) {
@@ -73,6 +67,10 @@ public class Board{
 		return board;
 	}
 
+    public Space[][] getBoard(){
+        return this.map;
+    }
+
     public ArrayList<Space> remainingMoves(){
 		int freeSpaces = 0;
 		int row, col;
@@ -87,8 +85,35 @@ public class Board{
 			}
 
 		}
-		System.out.println("Remaining spaces: " + freeSpaces);
 		return remainingSpaces;
-
 	}
+
+    public Space highestVal(){
+        Space highest = null;
+        int maxVal = 0;
+
+        for (Space sp : remainingMoves()){
+            if (sp.value() > maxVal){
+                maxVal = sp.value();
+                highest = sp;
+            }
+        }
+
+        return highest;
+    }
+
+    public ArrayList<Space> getOwnedSpaces(Player curPlayer){
+        ArrayList<Space> owned = new ArrayList<>();
+        int row, col;
+
+		for(row = 0; row < map.length; row++){
+			for(col = 0; col < map[0].length; col++){
+				if (map[row][col].occupiedBy() == curPlayer){
+                    owned.add(map[row][col]);
+				}
+			}
+		}
+
+        return owned;
+    }
 }
