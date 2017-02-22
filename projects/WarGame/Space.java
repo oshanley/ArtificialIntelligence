@@ -1,19 +1,23 @@
+import java.util.ArrayList;
+
 public class Space {
-        private int points;
+        private int val;
         private boolean occupied;
         private int[] coords;
         private Space previousMove;
+        private Player occupiedBy;
 
 
-        public Space (int points, int[] coords){
-          this.points = points;
+        public Space (int value, int[] coords){
+          this.val = value;
           this.coords = coords;
         }
 
         /* Setters */
 
-        public void setOccupied(boolean occupied){
-            this.occupied = occupied;
+        public void setOccupied(Player player){
+            this.occupiedBy = player;
+            this.occupied = true;
         }
 
         public void setCoords(int[] coords){
@@ -25,13 +29,17 @@ public class Space {
         }
 
         /* Getters */
-        
-        public int getPoints() {
-			return this.points;
+
+        public int value() {
+			return this.val;
 		}
 
         public boolean isOccupied(){
             return this.occupied;
+        }
+
+        public Player occupiedBy(){
+            return this.occupiedBy;
         }
 
         public int[] getCoords() {
@@ -40,6 +48,50 @@ public class Space {
 
         public Space getPreviousMove(){
             return this.previousMove;
+        }
+
+        /* methods */
+        public ArrayList<Space> validNeighbors(Space[][] map){
+            ArrayList<Space> validMoves = new ArrayList<Space>();
+
+            //check bounds, then determine if a neighbor is valid
+            int curRow = this.coords[0];
+            int curCol = this.coords[1];
+
+            if (curRow > 0){
+                Space up = map[curRow-1][curCol];
+                if(!(up.isOccupied())){
+                    up.setPreviousMove(this);
+
+                    validMoves.add(up);
+                }
+            }
+            if(curRow < map.length-1){
+                Space down = map[curRow+1][curCol];
+                if(!(down.isOccupied())){
+                    down.setPreviousMove(this);
+
+                    validMoves.add(down);
+                }
+            }
+            if(curCol > 0){
+                Space left = map[curRow][curCol-1];
+                if(!(left.isOccupied())){
+                    left.setPreviousMove(this);
+
+                    validMoves.add(left);
+                }
+            }
+            if(curCol < map[0].length-1){
+                Space right = map[curRow][curCol+1];
+                if(!(right.isOccupied())){
+                    right.setPreviousMove(this);
+
+                    validMoves.add(right);
+                }
+            }
+
+            return validMoves;
         }
 
     }

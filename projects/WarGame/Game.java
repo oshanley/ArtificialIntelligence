@@ -5,134 +5,92 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+	//minimax looks at all possible moves
+
 public class Game {
 
 	ArrayList<File> boards;
 	ArrayList<String> agents;
 
-	private ArrayList<Space> validMoves(Space[][] board, Space previousMove, int curRow, int curCol){
-        ArrayList<Space> validMoves = new ArrayList<Space>();
-
-        //check bounds, then determine if a neighbor is valid
-        //if so, set previousMove connecion to current space and set visited to true
-
-        if (curRow > 0){
-            Space up = board[curRow-1][curCol];
-            if(!(up.isOccupied())){
-                up.setPreviousMove(previousMove);
-
-                validMoves.add(up);
-            }
-        }
-        if(curRow < board.length-1){
-            Space down = board[curRow+1][curCol];
-            if(!(down.isOccupied())){
-                down.setPreviousMove(previousMove);
-
-                validMoves.add(down);
-            }
-        }
-        if(curCol > 0){
-            Space left = board[curRow][curCol-1];
-            if(!(left.isOccupied())){
-                left.setPreviousMove(previousMove);
-
-                validMoves.add(left);
-            }
-        }
-        if(curCol < board[0].length-1){
-            Space right = board[curRow][curCol+1];
-            if(!(right.isOccupied())){
-                right.setPreviousMove(previousMove);
-
-                validMoves.add(right);
-            }
-        }
-
-        return validMoves;
-    }
-
-	// private Space makeMove(){
+	//valid neighbors to be used for blitz
+	// private ArrayList<Space> validNeighbors(Space[][] map, Space curSpace, int curRow, int curCol){
+    //     ArrayList<Space> validMoves = new ArrayList<Space>();
 	//
-	// }
-	private void playGame(Space [][] board){
-		boolean gameOver = false;
+    //     //check bounds, then determine if a neighbor is valid
+    //     //if so, set previousMove connecion to current space and set visited to true
+	//
+    //     if (curRow > 0){
+    //         Space up = map[curRow-1][curCol];
+    //         if(!(up.isOccupied())){
+    //             up.setPreviousMove(curSpace);
+	//
+    //             validMoves.add(up);
+    //         }
+    //     }
+    //     if(curRow < map.length-1){
+    //         Space down = map[curRow+1][curCol];
+    //         if(!(down.isOccupied())){
+    //             down.setPreviousMove(curSpace);
+	//
+    //             validMoves.add(down);
+    //         }
+    //     }
+    //     if(curCol > 0){
+    //         Space left = map[curRow][curCol-1];
+    //         if(!(left.isOccupied())){
+    //             left.setPreviousMove(curSpace);
+	//
+    //             validMoves.add(left);
+    //         }
+    //     }
+    //     if(curCol < map[0].length-1){
+    //         Space right = map[curRow][curCol+1];
+    //         if(!(right.isOccupied())){
+    //             right.setPreviousMove(curSpace);
+	//
+    //             validMoves.add(right);
+    //         }
+    //     }
+	//
+    //     return validMoves;
+    // }
 
-		Player p1 = new Player();
-		Player p2 = new Player();
-		Player curPlayer = p1;
+	private void playGame(Board board, Player greenPlayer, Player bluePlayer){
+		boolean gameOver = false;
+		Player curPlayer = greenPlayer;
+		Space[][] map = board.getBoard();
 
 		while(!gameOver){
-
-			//make moves
-
-
-				//switch Player
-				if (curPlayer.equals(p1))
-					curPlayer = p2;
-				else if (curPlayer.equals(p2))
-					curPlayer = p1;
-
-		}
-	}
-
-	private Space[][] parseMap(File file) {
-		FileReader fr;
-		Space[][] board = null;
-
-		try {
-			fr = new FileReader(file);
-			BufferedReader br = new BufferedReader(fr); // buffer input
-
-			// dimensions of grid
-			final int colSize = 5;
-		  	final int rowSize = 5;
-			int row = 0;
-			int col = 0;
-
-
-			board = new Space[rowSize][colSize];
-
-			int spaceVal = br.read();
-
-			while(br.ready()){
-
-				//initialize space on board
-				int[] coords = new int[2];
-				coords[0] = row;
-				coords[1] = col;
-
-				board[row][col] = new Space(spaceVal, coords);
-
-				System.out.print(spaceVal + "\t");
-
-				//go to next column
-				col++;
-
-				//if column out of bounds
-				if (col > colSize - 1){
-					//go to beginning of next row
-					row++;
-					col = 0;
-					//if row out of bounds too (aka end of grid), exit
-					if(row > rowSize - 1)
+			if (board.remainingMoves().size() == 0){
+				System.out.println("No remaining moves. Game over");
+				gameOver = true;
+			}
+			else{
+				//make move depending on play method
+				switch (curPlayer.playMethod()) {
+					case "minimax":
 						break;
 
-					System.out.println();
+					case "random":
+						RandomPlayer randP = new RandomPlayer();
+						randP.makeMove();
+						break;
+
+					case "AB":
+						break;
 				}
 
-				//get next value from file
-				spaceVal = br.read();
-
-            }
-			//place console prompt on new line
-			System.out.println();
-			br.close();
-
-		} catch (IOException e) {
-			e.printStackTrace();
+				//switch Player
+				if (curPlayer.equals(greenPlayer)){
+					System.out.println("Player 2's turn");
+					curPlayer = bluePlayer;
+				}
+				else if (curPlayer.equals(bluePlayer)){
+					System.out.println("Player 1's turn");
+					curPlayer = greenPlayer;
+				}
+			}
 		}
-		return board;
 	}
 
 	private String choosePlayerType(){
@@ -180,12 +138,12 @@ public class Game {
 			break;
 
 	    }
-		System.out.println();
 
 	    return userInput;
 
 	}
-	private File chooseBoard(){
+
+	public File chooseBoard(){
 		String userInput;
 	    System.out.println("Choose a board to play on (i.e. Kalamazoo):");
 
@@ -206,7 +164,7 @@ public class Game {
 	    System.out.println("\nYou selected: " + userInput + "\n");
 
 	    return new File(userInput);
-}
+	}
 
 	public Game(){
 		boards = new ArrayList<File>(Arrays.asList(new File("./GameBoards").listFiles()));
@@ -215,10 +173,27 @@ public class Game {
 
 	public static void main(String[] args) {
 		Game war = new Game();
+
 		File boardChoice = war.chooseBoard();
+		Board board = new Board(boardChoice);
+
+
+		//Intiialize players
+		System.out.println("----------------------------------------------------");
+		System.out.println("Player One:");
 		String playerOneType = war.choosePlayerType();
-		Space[][] board = war.parseMap(boardChoice);
-		//war.playGame(board);
+		Player greenPlayer = new Player(playerOneType);
+
+		System.out.println("----------------------------------------------------");
+		System.out.println("Player Two:");
+		String playerTwoType = war.choosePlayerType();
+		Player bluePlayer = new Player(playerTwoType);
+		System.out.println("----------------------------------------------------");
+		System.out.println();
+
+		//Initialize board
+		Space[][] map = board.getBoard();
+		war.playGame(board, greenPlayer, bluePlayer);
 	}
 
 }
