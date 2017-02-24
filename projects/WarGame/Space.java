@@ -23,10 +23,6 @@ public class Space {
 
         /* Setters */
 
-        //public void isOccupied(boolean bool){
-        //    this.occupied = bool;
-        //}
-
         public void setOccupier(Player player){
             this.occupiedBy = player;
             this.occupied = true;

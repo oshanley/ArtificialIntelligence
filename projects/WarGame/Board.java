@@ -40,6 +40,7 @@ public class Board{
 
 			board = new Space[rowSize][colSize];
 
+            //read in from file and initialize map Spaces
 			while((line = br.readLine()) != null){
                 String[] nums = line.split("\\s+");
                 for(String c : nums){
@@ -83,20 +84,6 @@ public class Board{
 		}
 		return remainingSpaces;
 	}
-
-    public Space highestVal(){
-        Space highest = null;
-        int maxVal = 0;
-
-        for (Space sp : remainingMoves()){
-            if (sp.value() > maxVal){
-                maxVal = sp.value();
-                highest = sp;
-            }
-        }
-
-        return highest;
-    }
 
     public ArrayList<Space> getOwnedSpaces(Player curPlayer){
         ArrayList<Space> owned = new ArrayList<>();

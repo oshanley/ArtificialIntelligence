@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-	//minimax looks at all possible moves
-
 public class Game {
 
 	ArrayList<File> boards;
@@ -21,15 +19,6 @@ public class Game {
 		Move makeMove = new Move(board, curPlayer, opponent);
 		System.out.println("Making move at: " + attackSpace.getCoords()[0] + "," + attackSpace.getCoords()[1]);
 		makeMove.attack(attackSpace);
-		/*if(attackSpace.isOccupied() == true){
-			if (board.getBoard()[attackSpace.getCoords()[0]][attackSpace.getCoords()[1]].isOccupied())
-				System.out.println("Board has been updated");
-			else System.out.println("Board has not been updated.");
-			System.out.println("Space set to occupied");
-			System.out.println("Before function ends, board has " + board.remainingMoves().size() + " moves");
-
-		}*/
-		System.out.println("Player new score: " + curPlayer.getScore());
     }
 
 	private void playGame(Board board, Player p1, Player p2){
@@ -57,9 +46,8 @@ public class Game {
 				switch (curPlayer.playMethod()) {
 					case "minimax":
 						minimax(board, curPlayer, opponent);
-						//Move mm = new Move(board, curPlayer, opponent);
-					//	Space attack = mm.minimax(3);
-						System.out.println("After move, board has " + board.remainingMoves().size() + " moves");
+						System.out.println("Player new score: " + curPlayer.getScore());
+						System.out.println();
 						break;
 
 					case "random":
@@ -175,8 +163,7 @@ public class Game {
 
 		//Initialize players
 
-		//Player 1 (green)
-
+		//Player 1
 		System.out.println("----------------------------------------------------");
 		System.out.println("Player One:");
 		String playerOneType = war.choosePlayerType();
@@ -185,14 +172,13 @@ public class Game {
 
 		System.out.println("----------------------------------------------------");
 
-		//Player 2 (Blue)
+		//Player 2
 		System.out.println("Player Two:");
 		String playerTwoType = war.choosePlayerType();
 		p2 = new Player(playerTwoType);
 
 		System.out.println("----------------------------------------------------");
 		System.out.println();
-
 
 		//Initialize board
 		Space[][] map = board.getBoard();

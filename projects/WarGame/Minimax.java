@@ -21,7 +21,6 @@ public class Minimax{
 
     public Space minimax(){
         max(initialState, maxDepth);
-        System.out.println("Making move at: " + nextMove.getCoords()[0] + "," + nextMove.getCoords()[1]);
 
         return nextMove;
     }
@@ -32,10 +31,10 @@ public class Minimax{
 
         //if end of game or max depth reached, return differences between player scores
         if(curBoard.remainingMoves().size() == 0 || curDepth == 0){
-            if (maxPlayer.getScore()>minPlayer.getScore())
-                return 10;
-            else return -10;
-            //return maxPlayer.getScore()-minPlayer.getScore();
+            // if (maxPlayer.getScore()>minPlayer.getScore())
+            //     return 10;
+            // else return -10;
+            return maxPlayer.getScore()-minPlayer.getScore();
         }
         else{
 
@@ -50,12 +49,15 @@ public class Minimax{
                 //mock out an attack
                 Move MockAttack = new Move(mockAttackBoard, mockMaxPlayer, mockMinPlayer);
                 nextState = mockAttackBoard;
-                nextMove = sp;
 
-                //if the current move
+                //perform min on next state
                 int v = min(nextState, curDepth-1);
-                if(v>bestValue)
+
+                //if the current move is the best move, set as next move
+                if(v>bestValue){
+                    nextMove = sp;
                     bestValue = v;
+                }
             }
             return bestValue;
         }
@@ -67,10 +69,10 @@ public class Minimax{
 
         //if end of game, determine winner
         if(curBoard.remainingMoves().size() == 0 || curDepth == 0){
-            if (maxPlayer.getScore()>minPlayer.getScore())
+            /*if (maxPlayer.getScore()>minPlayer.getScore())
                 return 10;
-            else return -10;
-            //return minPlayer.getScore()-maxPlayer.getScore();
+            else return -10;*/
+            return maxPlayer.getScore()-minPlayer.getScore();
         }
         else{
 
@@ -84,16 +86,17 @@ public class Minimax{
 
                 Move MockAttack = new Move(mockAttackBoard, mockMaxPlayer, mockMinPlayer);
                 nextState = mockAttackBoard;
-                nextMove = sp;
+
+                //perform max on next state
                 int v = max(nextState, curDepth-1);
-                if(v<bestValue)
+
+                //if the current move is the best move, set as next move
+                if(v<bestValue){
                     bestValue = v;
+                    nextMove = sp;
+                }
             }
             return bestValue;
-
         }
     }
-
-
-
 }
