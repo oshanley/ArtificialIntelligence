@@ -8,6 +8,20 @@ public class Board{
         this.map = parseMap(boardChoice);
     }
 
+    public Board(Board copy){
+        int row;
+        int col;
+        final int colSize = copy.map[0].length;
+        final int rowSize = copy.map.length;
+
+        this.map = new Space[rowSize][colSize];
+        for(row = 0; row < rowSize; row++){
+            for (col = 0; col < colSize; col++){
+                this.map[row][col] = new Space(copy.map[row][col]);
+            }
+        }
+    }
+
     public Space[][] parseMap(File file) {
 		FileReader fr;
 		Space[][] board = null;
@@ -21,41 +35,25 @@ public class Board{
 		  	final int rowSize = 5;
 			int row = 0;
 			int col = 0;
-
+            String line = "";
+            int i = 1;
 
 			board = new Space[rowSize][colSize];
 
-			int spaceVal = br.read();
-
-			while(br.ready()){
-
-				//initialize space on board
-				int[] coords = new int[2];
-				coords[0] = row;
-				coords[1] = col;
-
-				board[row][col] = new Space(spaceVal, coords);
-
-				System.out.print(spaceVal + "\t");
-
-				//go to next column
-				col++;
-
-				//if column out of bounds
-				if (col > colSize - 1){
-					//go to beginning of next row
-					row++;
-					col = 0;
-					//if row out of bounds too (aka end of grid), exit
-					if(row > rowSize - 1)
-						break;
-
-					System.out.println();
-				}
-
-				//get next value from file
-				spaceVal = br.read();
-
+			while((line = br.readLine()) != null){
+                String[] nums = line.split("\\s+");
+                for(String c : nums){
+                    int[] coords = new int[2];
+    				coords[0] = row;
+    				coords[1] = col;
+    				board[row][col] = new Space(Integer.parseInt(c), coords);
+                    System.out.print(Integer.parseInt(c) + " ");
+                    col++;
+                }
+                i++;
+                row++;
+                col = 0;
+            	System.out.println();
             }
 			//place console prompt on new line
 			System.out.println();
@@ -72,15 +70,13 @@ public class Board{
     }
 
     public ArrayList<Space> remainingMoves(){
-		int freeSpaces = 0;
 		int row, col;
         ArrayList<Space> remainingSpaces = new ArrayList<>();
 
 		for(row = 0; row < map.length; row++){
 			for(col = 0; col < map[0].length; col++){
-				if (!map[row][col].isOccupied()){
+				if (!(map[row][col].isOccupied())){
                     remainingSpaces.add(map[row][col]);
-					freeSpaces++;
 				}
 			}
 

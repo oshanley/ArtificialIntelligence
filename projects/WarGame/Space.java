@@ -13,7 +13,19 @@ public class Space {
           this.coords = coords;
         }
 
+        public Space (Space toCopy){
+            this.val = toCopy.val;
+            this.occupied = toCopy.occupied;
+            this.coords = toCopy.coords;
+            this.previousMove = toCopy.previousMove;
+            this.occupiedBy = toCopy.occupiedBy;
+        }
+
         /* Setters */
+
+        //public void isOccupied(boolean bool){
+        //    this.occupied = bool;
+        //}
 
         public void setOccupier(Player player){
             this.occupiedBy = player;
@@ -94,8 +106,8 @@ public class Space {
             return validMoves;
         }
 
-        public ArrayList<Space> neighboringEnemies(Space[][] map, Player curPlayer){
-            ArrayList<Space> enemies = new ArrayList<Space>();
+        public ArrayList<Space> neighborsOwnedBy(Space[][] map, Player curPlayer){
+            ArrayList<Space> owned = new ArrayList<Space>();
 
             //check bounds, then determine if a neighbor is valid
             int curRow = this.coords[0];
@@ -103,30 +115,30 @@ public class Space {
 
             if (curRow > 0){
                 Space up = map[curRow-1][curCol];
-                if((up.isOccupied()) && (up.occupiedBy()!=curPlayer)){
-                    enemies.add(up);
+                if((up.isOccupied()) && (up.occupiedBy()==curPlayer)){
+                    owned.add(up);
                 }
             }
             if(curRow < map.length-1){
                 Space down = map[curRow+1][curCol];
-                if((down.isOccupied()) && (down.occupiedBy()!=curPlayer)){
-                    enemies.add(down);
+                if((down.isOccupied()) && (down.occupiedBy()==curPlayer)){
+                    owned.add(down);
                 }
             }
             if(curCol > 0){
                 Space left = map[curRow][curCol-1];
-                if((left.isOccupied()) && (left.occupiedBy()!=curPlayer)){
-                    enemies.add(left);
+                if((left.isOccupied()) && (left.occupiedBy()==curPlayer)){
+                    owned.add(left);
                 }
             }
             if(curCol < map[0].length-1){
                 Space right = map[curRow][curCol+1];
-                if((right.isOccupied()) && (right.occupiedBy()!=curPlayer)){
-                    enemies.add(right);
+                if((right.isOccupied()) && (right.occupiedBy()==curPlayer)){
+                    owned.add(right);
                 }
             }
 
-            return enemies;
+            return owned;
         }
 
     }
