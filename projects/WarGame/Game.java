@@ -21,6 +21,17 @@ public class Game {
 		makeMove.attack(attackSpace);
     }
 
+	public void alphabeta(Board board, Player curPlayer, Player opponent){
+        //create a new AlphaBeta Object
+		int maxDepth = 6;
+		AlphaBeta agent = new AlphaBeta(board, maxDepth,curPlayer, opponent);
+		Space attackSpace = agent.minimax();
+
+		Move makeMove = new Move(board, curPlayer, opponent);
+		System.out.println("Making move at: " + attackSpace.getCoords()[0] + "," + attackSpace.getCoords()[1]);
+		makeMove.attack(attackSpace);
+    }
+
 	private void playGame(Board board, Player p1, Player p2){
 		boolean gameOver = false;
 		Player curPlayer = p1;
@@ -58,6 +69,9 @@ public class Game {
 						break;
 
 					case "AB":
+						alphabeta(board, curPlayer, opponent);
+						System.out.println("Player new score: " + curPlayer.getScore());
+						System.out.println();
 						break;
 				}
 

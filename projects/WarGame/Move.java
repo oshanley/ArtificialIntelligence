@@ -40,9 +40,9 @@ public class Move{
         //if the space can be used as a blitz, conquer any neighboring enemies
         if(canBlitz(chosenSpace)){
             ArrayList <Space> enemies = chosenSpace.neighborsOwnedBy(board.getBoard(), opponent);
-            System.out.println("Space being blitzed has " + enemies.size() + " enemies to conquer");
 
             if(enemies.size()!= 0){
+                System.out.println("Space being blitzed has " + enemies.size() + " enemies to conquer");
                 for (Space enemy : enemies){
                     coords = enemy.getCoords();
 
