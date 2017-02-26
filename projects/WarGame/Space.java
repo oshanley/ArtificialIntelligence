@@ -7,7 +7,6 @@ public class Space {
         private Space previousMove;
         private Player occupiedBy;
 
-
         public Space (int value, int[] coords){
           this.val = value;
           this.coords = coords;

@@ -19,7 +19,6 @@ public class Move{
             return true;
         else
             return false;
-
     }
 
     //given a space, check if you can conquer its neighbors
@@ -45,7 +44,6 @@ public class Move{
                 System.out.println("Space being blitzed has " + enemies.size() + " enemies to conquer");
                 for (Space enemy : enemies){
                     coords = enemy.getCoords();
-
 
                     System.out.println("Player: +" + enemy.value());
     				System.out.println("Opponent: -" + enemy.value());

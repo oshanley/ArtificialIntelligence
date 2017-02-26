@@ -4,6 +4,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.*;
 
 public class Game {
 
@@ -48,15 +49,26 @@ public class Game {
 					System.out.println("Player 2 wins");
 				else
 					System.out.println("It's a tie!");
-
+					System.out.println();
 				gameOver = true;
 			}
 			else{
+				long startTime = 0;
+				long elapsedTime = 0;
+				startTime = System.nanoTime();
+
+				curPlayer.updateTotalMoves();
 				System.out.println("Remaining spaces: " + board.remainingMoves().size());
 				//make move depending on play method
 				switch (curPlayer.playMethod()) {
 					case "minimax":
 						minimax(board, curPlayer, opponent);
+
+						elapsedTime = System.nanoTime() - startTime;
+						elapsedTime = TimeUnit.MILLISECONDS.convert(elapsedTime, TimeUnit.NANOSECONDS);
+						System.out.println("Elapsed time: " + elapsedTime + "ms");
+
+						curPlayer.updateTime(elapsedTime);
 						System.out.println("Player new score: " + curPlayer.getScore());
 						System.out.println();
 						break;
@@ -64,12 +76,23 @@ public class Game {
 					case "random":
 						Move makeMove = new Move(board, curPlayer, opponent);
 						makeMove.randomMove();
+
+						elapsedTime = System.nanoTime() - startTime;
+						elapsedTime = TimeUnit.MILLISECONDS.convert(elapsedTime, TimeUnit.NANOSECONDS);
+						System.out.println("Elapsed time: " + elapsedTime + "ms");
+						curPlayer.updateTime(elapsedTime);
+
 						System.out.println("Player new score: " + curPlayer.getScore());
 						System.out.println();
 						break;
 
 					case "AB":
 						alphabeta(board, curPlayer, opponent);
+						elapsedTime = System.nanoTime() - startTime;
+						elapsedTime = TimeUnit.MILLISECONDS.convert(elapsedTime, TimeUnit.NANOSECONDS);
+						System.out.println("Elapsed time: " + elapsedTime + "ms");
+						curPlayer.updateTime(elapsedTime);
+
 						System.out.println("Player new score: " + curPlayer.getScore());
 						System.out.println();
 						break;
@@ -88,6 +111,43 @@ public class Game {
 				}
 			}
 		}
+
+		//print statistics for player 1
+		long totalTime = p1.getGameTime();
+		int moves = p1.getTotalMoves();
+		long avgTime = (long)(totalTime/moves);
+		int totalNodes = p1.getExplored();
+		int avgNodes = totalNodes/moves;
+		ArrayList<Space> ownedSpaces = board.getOwnedSpaces(p1);
+
+		//Display scores, average move time,
+		System.out.println("Player 1 total play time: " + totalTime + "ms");
+		System.out.println("Player 1 avg move time: " + avgTime + "ms");
+		System.out.println("Player 1 nodes explored: " + totalNodes);
+		System.out.println("Player 1 avg nodes explored per move: " + avgNodes);
+		System.out.println("Player 1 owns the following spaces: ");
+		for(Space sp : ownedSpaces)
+			System.out.print("(" + sp.getCoords()[0] + "," + sp.getCoords()[1] + ") ");
+
+		System.out.println("\n");
+
+		//print statistics for player 1
+		totalTime = p2.getGameTime();
+		moves = p2.getTotalMoves();
+		avgTime = (long)(totalTime/moves);
+		totalNodes = p2.getExplored();
+		avgNodes = totalNodes/moves;
+		ownedSpaces = board.getOwnedSpaces(p2);
+
+		System.out.println("Player 2 total play time: " + totalTime + "ms");
+		System.out.println("Player 2 avg move time: " + avgTime + "ms");
+		System.out.println("Player 2 nodes explored per move: " + totalNodes);
+		System.out.println("Player 2 avg nodes explored: " + avgNodes);
+		System.out.println("Player 2 owns the following spaces: ");
+		for(Space sp : ownedSpaces)
+			System.out.print("(" + sp.getCoords()[0] + "," + sp.getCoords()[1] + ") ");
+
+		System.out.println();
 	}
 
 	private String choosePlayerType(){

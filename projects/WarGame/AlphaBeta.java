@@ -23,13 +23,14 @@ public class AlphaBeta{
 
         //if end of game or max depth reached, return differences between player scores
         if(curBoardState.remainingMoves().size() == 0 || curDepth == 0){
-            //System.out.println("NODE: " + nextMove.getCoords()[0] + "," + nextMove.getCoords()[1]);
             if (maxPlayer.getScore()>minPlayer.getScore())
                 return 10;
             else return -10;
-            //return maxPlayer.getScore()-minPlayer.getScore();
         }
         else{
+            //increment explored nodes
+            maxPlayer.incrementExplored();
+
             //create separate state to mock out attack
             Board mockAttackBoard = new Board(curBoardState);
             Player mockMaxPlayer = new Player(maxPlayer);
@@ -54,8 +55,6 @@ public class AlphaBeta{
                 if (bestValue > alpha)
                     alpha = bestValue;
 
-                // System.out.println("max evaulating: " + sp.getCoords()[0] + "," + sp.getCoords()[1]);
-
                 //beta cutoff detected
                 if(beta <= alpha){
                     break;
@@ -71,7 +70,6 @@ public class AlphaBeta{
 
         //if end of game or max depth reached, return differences between player scores
         if(curBoardState.remainingMoves().size() == 0 || curDepth == 0){
-            //System.out.println("NODE: " + nextMove.getCoords()[0] + "," + nextMove.getCoords()[1]);
 
             if (maxPlayer.getScore()>minPlayer.getScore())
                 return 10;
@@ -79,6 +77,8 @@ public class AlphaBeta{
             //return maxPlayer.getScore()-minPlayer.getScore();
         }
         else{
+            //increment the number of nodes explored
+            maxPlayer.incrementExplored();
 
             //create separate state to mock out attack
             Board mockAttackBoard = new Board(curBoardState);
@@ -86,8 +86,7 @@ public class AlphaBeta{
             Player mockMinPlayer = new Player(minPlayer);
 
             //loop through all possible moves
-            for (Space sp : curBoardState.remainingMoves
-            ()){
+            for (Space sp : curBoardState.remainingMoves()){
 
                 //mock out an attack and save the state of the board
                 Move mockAttack = new Move(mockAttackBoard, mockMaxPlayer, mockMinPlayer);
@@ -102,8 +101,6 @@ public class AlphaBeta{
                 }
                 if (bestValue < alpha)
                     alpha = bestValue;
-
-                // System.out.println("max evaulating: " + sp.getCoords()[0] + "," + sp.getCoords()[1]);
 
                 //alpha cutoff detected
                 if(beta <= alpha){

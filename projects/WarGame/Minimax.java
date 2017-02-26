@@ -25,7 +25,6 @@ public class Minimax{
 
         //if end of game or max depth reached, return differences between player scores
         if(curBoardState.remainingMoves().size() == 0 || curDepth == 0){
-            //System.out.println("NODE: " + nextMove.getCoords()[0] + "," + nextMove.getCoords()[1]);
 
             if (maxPlayer.getScore()>minPlayer.getScore())
                 return 10;
@@ -33,6 +32,8 @@ public class Minimax{
             //return maxPlayer.getScore()-minPlayer.getScore();
         }
         else{
+            //increment explored nodes
+            maxPlayer.incrementExplored();
 
             //create separate state to mock out attack
             Board mockAttackBoard = new Board(curBoardState);
@@ -68,14 +69,14 @@ public class Minimax{
 
         //if end of game, determine winner
         if(curBoardState.remainingMoves().size() == 0 || curDepth == 0){
-            //System.out.println("NODE: " + nextMove.getCoords()[0] + "," + nextMove.getCoords()[1]);
 
             if (maxPlayer.getScore()>minPlayer.getScore())
                 return 10;
             else return -10;
-            //return maxPlayer.getScore()-minPlayer.getScore();
         }
         else{
+            //increment explored nodes
+            maxPlayer.incrementExplored();
 
             //create separate state to mock out attack
             Board mockAttackBoard = new Board(curBoardState);
@@ -109,7 +110,6 @@ public class Minimax{
         System.out.println("----------------");
         max(initialState, maxDepth);
         System.out.println("----------------");
-
 
         return nextMove;
     }
