@@ -1,10 +1,19 @@
+/* Olivia Shanley
+CSC 380 Artificial Intelligence
+Project 2 - War
+Dr. Salgian, The College of New Jersey
+
+The Space class keeps track of attributes for every square on the board. These
+attributes include the value of the space, who (if anyone) occupies the space,
+and its coordinates. It also has helper functions which allow a space to get its
+surrounding neighbors, either the unoccupied ones or those occupied by a given player.  */
+
 import java.util.ArrayList;
 
 public class Space {
         private int val;
         private boolean occupied;
         private int[] coords;
-        private Space previousMove;
         private Player occupiedBy;
 
         public Space (int value, int[] coords){

@@ -1,3 +1,11 @@
+/* Olivia Shanley
+CSC 380 Artificial Intelligence
+Project 2 - War
+Dr. Salgian, The College of New Jersey
+
+The Minimax class creates the minimax agent object. It keeps track of the initial
+state of the board, as well as performs the minimax algorithm. Once finished, it
+returns the Space to be attacked by the current player. */
 import java.lang.Math;
 import java.util.ArrayList;
 

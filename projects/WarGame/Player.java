@@ -1,3 +1,13 @@
+/* Olivia Shanley
+CSC 380 Artificial Intelligence
+Project 2 - War
+Dr. Salgian, The College of New Jersey
+
+The Player class keeps track of all of a player's properties throughout the game.
+Such properties include the score, the algorithm that the player implements; the number of total moves
+throughout the game, as well as the total time for gameplay; and the number of nodes
+explored by the Minimax and Minimax with Alpha-beta pruning agents.*/
+
 import java.util.ArrayList;
 
 public class Player {

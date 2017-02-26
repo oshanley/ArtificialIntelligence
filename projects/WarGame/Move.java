@@ -1,3 +1,13 @@
+/* Olivia Shanley
+CSC 380 Artificial Intelligence
+Project 2 - War
+Dr. Salgian, The College of New Jersey
+
+The Move class is the main class for making a move on the board. It consists of
+two main functions (attack() and randomMove()), as well as a helper function to
+indicate whether or not a space can be used as a blitz. The randomMove() functions
+is used by the random player and selects a random free space on the board to attack. */
+
 import java.util.ArrayList;
 
 public class Move{
@@ -21,7 +31,7 @@ public class Move{
             return false;
     }
 
-    //given a space, check if you can conquer its neighbors
+    //given a space, conquer it, then check if you can conquer its neighbors
     public int attack(Space chosenSpace){
         Space[][] map = board.getBoard();
         int earnedPoints = 0;

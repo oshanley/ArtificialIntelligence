@@ -1,3 +1,11 @@
+/* Olivia Shanley
+CSC 380 Artificial Intelligence
+Project 2 - War
+Dr. Salgian, The College of New Jersey
+
+The purpose of this Game class is to serve as the driver for the program. It
+initializes the board and its players; implements game play through the switching of players,
+as well as calling the respective moves for each player; and determines when the game has ended. */
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;

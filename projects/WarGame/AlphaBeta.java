@@ -1,3 +1,12 @@
+/* Olivia Shanley
+CSC 380 Artificial Intelligence
+Project 2 - War
+Dr. Salgian, The College of New Jersey
+
+The AlphaBeta class creates an object which implements a Minimax with Alpha-Beta Pruning algorithm.
+It keeps track of the initial state of the board, as well as performs the Alpha-beta pruning algorithm.
+Once finished, it returns the Space to be attacked by the current player. */
+
 public class AlphaBeta{
 
     Board initialState;

@@ -1,3 +1,12 @@
+/* Olivia Shanley
+CSC 380 Artificial Intelligence
+Project 2 - War
+Dr. Salgian, The College of New Jersey
+
+The Board class is used to create the game board for War. It parses a file for a map,
+initializes a board of Spaces, and has helper functions to return either the unoccupied
+Spaces on the board or the Spaces owned by a given player. */
+
 import java.util.*;
 import java.io.*;
 
