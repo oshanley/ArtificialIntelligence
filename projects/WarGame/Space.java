@@ -15,6 +15,7 @@ public class Space {
         private boolean occupied;
         private int[] coords;
         private Player occupiedBy;
+        private Space previousMove;
 
         public Space (int value, int[] coords){
           this.val = value;
@@ -27,6 +28,7 @@ public class Space {
             this.coords = toCopy.coords;
             this.previousMove = toCopy.previousMove;
             this.occupiedBy = toCopy.occupiedBy;
+            this.previousMove = toCopy.previousMove;
         }
 
         /* Setters */
