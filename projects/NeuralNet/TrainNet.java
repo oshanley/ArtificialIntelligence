@@ -2,17 +2,20 @@ import java.util.*;
 import java.io.*;
 
 public class TrainNet{
-    int TRAIN_IMAGES = 5000;
+    int TRAIN_IMAGES = 1;
     int NUM_PIXELS = 784;
     int NUM_OUTPUTS = 10;
     int NUM_LABELS = 11000;
-    double ALPHA = .3; //learning rate (between 0-1)
+    int MAX_ITER = 1;
+    double STOP_ACCURACY = 0.95;
+    double ALPHA = .6; //learning rate (between 0-1)
     double [][] images; //stores each pixel of each image
     double [][] weights = new double [NUM_OUTPUTS][NUM_PIXELS+1]; //each of the 10 outputs has a weight for each input pixel plus a bias weight
     int [] labels = new int[NUM_LABELS]; //correct labels of input images
     double [] outputs = new double [NUM_OUTPUTS]; //output units of the network (g(in))
     double [] errors = new double[NUM_OUTPUTS]; //errors of each output unit
 
+    //description: parses Labels.bin and assigns to array of labels such that labels[i] corresponds to images[i]
     public void parseLabels(){
         int height, width;
 
@@ -41,6 +44,7 @@ public class TrainNet{
     	}
     }
 
+    //description: for every image, parses and stores pixels normalized to values between 0 and 1
     public void parseImages(){
         images = new double [TRAIN_IMAGES][NUM_PIXELS+1];
         int height, width;
@@ -102,6 +106,13 @@ public class TrainNet{
             in = 0;
             g = 0;
 
+            //initialize max to first output value
+            if( i == 0){
+                max = outputs[i];
+                answer = 1;
+            }
+
+            //update weight[i][j]
             for (int j = 0; j < NUM_PIXELS; j++) {
                 in += weights[i][j]*pixels[j];
             //System.out.println("in += weights["+i+"]["+j+"]*pixels["+j+"]");
@@ -113,12 +124,7 @@ public class TrainNet{
             //store to array of outputs
             outputs[i] = g;
 
-            //initialize max to first output value
-            if( i == 0){
-                max = outputs[i];
-                answer = 1;
-            }
-
+            //check if current output value is max value
             if(outputs[i] > max){
                 max = outputs[i];
                 answer = i;
@@ -158,10 +164,33 @@ public class TrainNet{
 
                 //update weight: W += Alpha*Error*gprime*weight
                 weights[w][i] += ALPHA*errors[w]*gprime*images[img][i];
-                //System.out.println("Weights["+w+"]["+i+"]: " + weights[w][i]);
             }
         }
+    }
 
+    public void writeWeights(){
+        FileOutputStream fos = null;
+        DataOutputStream dos = null;
+
+        try {
+            fos = new FileOutputStream("weights.bin", false); //false flag overwrites any existing file
+            dos = new DataOutputStream(fos);
+
+            //write dimensions to file
+            dos.writeInt(weights.length);
+            dos.writeInt(weights[0].length);
+
+            for (int i = 0; i < weights.length; i++) {
+                for (int j =0; j < weights[i].length ; j++) {
+                    dos.writeDouble(weights[i][j]);
+                    //System.out.println("Writing weights[" + i + "][" + j + "]: " + weights[i][j]);
+                }
+            }
+
+            dos.close();
+        } catch (IOException e) {
+            System.err.println("ERROR: unable to write weights to file");
+        }
     }
 
     public int trainNetwork(){
@@ -171,7 +200,7 @@ public class TrainNet{
         int incorrect = 0;
 
         for(int img = 0; img < TRAIN_IMAGES; img++){
-
+            System.out.println("entered loop");
             //compute output weights to determine output of network
             output = computeOutputs(images[img]);
 
@@ -189,6 +218,7 @@ public class TrainNet{
                 computeError(output, labels[img], out_unit);
             }
 
+            System.out.println("about to update wights");
             //update the weights
             updateWeights(img);
             count++;
@@ -198,10 +228,10 @@ public class TrainNet{
     }
 
     public static void main(String[] args) {
-        int MAX_ITER = 300;
         TrainNet train = new TrainNet();
         int correct = 0;
-
+        int iter = 1;
+        double accuracy = 0;
         //read from train directory and fill images[][] with pixels
         train.parseImages();
 
@@ -209,14 +239,24 @@ public class TrainNet{
         train.parseLabels();
 
         //train the network MAX_ITER times
-        for (int iter = 0; iter < MAX_ITER; iter++) {
+        while(iter <= train.MAX_ITER && accuracy < train.STOP_ACCURACY){
+            correct = 0;
+            accuracy = 0;
+
             correct += train.trainNetwork();
+            accuracy = (double)correct/train.TRAIN_IMAGES;
+            System.out.println("=== Epoch #" + iter + " ===");
+            System.out.println("Accuracy: " + accuracy);
+            iter++;
         }
 
-        System.out.println("Learning rate: " + train.ALPHA);
-        System.out.println("\nTotal runs: " + MAX_ITER*train.TRAIN_IMAGES);
-        System.out.println("Num correct: " + correct);
-        System.out.println("Accuracy: " + ((double)correct/(MAX_ITER*train.TRAIN_IMAGES)*100)+ "%");
+        System.out.println("\nLearning rate: " + train.ALPHA);
+        System.out.println("Number of training images: " + train.TRAIN_IMAGES);
+        System.out.println("Total epochs: " + train.MAX_ITER);
+
+        train.writeWeights();
+        //System.out.println("Num correct: " + correct);
+       // System.out.println("Accuracy: " + ((double)correct/(MAX_ITER*train.TRAIN_IMAGES)*100)+ "%");
 
     }
 }
