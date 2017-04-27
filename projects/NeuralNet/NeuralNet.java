@@ -2,7 +2,7 @@ import java.util.*;
 import java.io.*;
 
 public class NeuralNet{
-    int TRAIN_IMAGES = 100;
+    int TRAIN_IMAGES = 10000;
     int NUM_PIXELS = 784;
     int NUM_OUTPUTS = 10;
     int NUM_LABELS = 11000;
