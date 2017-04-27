@@ -1,11 +1,7 @@
-all: makeTrain makeTest
+all: make
 
-makeTrain:
-	javac TrainNet.java
-
-makeTest:
-	javac TestNet.java
-
+make:
+	javac *.java
 
 clean:
 	rm *.class weights.bin

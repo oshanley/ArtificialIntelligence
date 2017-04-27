@@ -1,12 +1,12 @@
 import java.util.*;
 import java.io.*;
 
-public class TrainNet{
-    int TRAIN_IMAGES = 1;
+public class NeuralNet{
+    int TRAIN_IMAGES = 100;
     int NUM_PIXELS = 784;
     int NUM_OUTPUTS = 10;
     int NUM_LABELS = 11000;
-    int MAX_ITER = 1;
+    int MAX_ITER = 500;
     double STOP_ACCURACY = 0.95;
     double ALPHA = .6; //learning rate (between 0-1)
     double [][] images; //stores each pixel of each image
@@ -168,6 +168,38 @@ public class TrainNet{
         }
     }
 
+    public void readWeights(){
+        File weightsDir = new File("./weights.bin");
+        int rows = 0;
+        int cols = 0;
+        //for each image, read in each pixel
+        try {
+            FileInputStream fis = new FileInputStream(weightsDir);
+            DataInputStream dis = new DataInputStream(fis);
+
+            //read dimensions
+            // rows = dis.readInt();
+            // cols = dis.readInt();
+
+            //initialize weights array
+            //weights = new double[rows][cols];
+
+            //read weights
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < cols ; j++) {
+                    weights[i][j] = dis.readDouble();
+                    // System.out.println("Reading weights[" + i + "][" + j + "]: " + weights[i][j]);
+                }
+            }
+
+            fis.close();
+            dis.close();
+        }
+        catch(IOException e) {
+            System.err.println("Error reading files ");
+        }
+    }
+
     public void writeWeights(){
         FileOutputStream fos = null;
         DataOutputStream dos = null;
@@ -197,10 +229,8 @@ public class TrainNet{
         int output = 0;
         int count = 0;
         int correct = 0;
-        int incorrect = 0;
 
         for(int img = 0; img < TRAIN_IMAGES; img++){
-            System.out.println("entered loop");
             //compute output weights to determine output of network
             output = computeOutputs(images[img]);
 
@@ -208,17 +238,12 @@ public class TrainNet{
                 //System.out.println("CORRECT");
                 correct++;
             }
-            else{
-                //System.out.println("WRONG");
-                incorrect++;
-            }
 
             //for each output unit of the network, compute the error
             for(int out_unit = 0; out_unit < NUM_OUTPUTS; out_unit++){
                 computeError(output, labels[img], out_unit);
             }
 
-            System.out.println("about to update wights");
             //update the weights
             updateWeights(img);
             count++;
@@ -227,36 +252,31 @@ public class TrainNet{
         return correct;
     }
 
-    public static void main(String[] args) {
-        TrainNet train = new TrainNet();
+    public int testNetwork(){
+        int output = 0;
+        int count = 0;
         int correct = 0;
-        int iter = 1;
-        double accuracy = 0;
-        //read from train directory and fill images[][] with pixels
-        train.parseImages();
 
-        //parse labels
-        train.parseLabels();
+        for(int img = 0; img < TRAIN_IMAGES; img++){
+            //compute output weights to determine output of network
+            output = computeOutputs(images[img]);
 
-        //train the network MAX_ITER times
-        while(iter <= train.MAX_ITER && accuracy < train.STOP_ACCURACY){
-            correct = 0;
-            accuracy = 0;
+            if(output == labels[img]){
+                //System.out.println("CORRECT");
+                correct++;
+            }
 
-            correct += train.trainNetwork();
-            accuracy = (double)correct/train.TRAIN_IMAGES;
-            System.out.println("=== Epoch #" + iter + " ===");
-            System.out.println("Accuracy: " + accuracy);
-            iter++;
+
+            //for each output unit of the network, compute the error
+            for(int out_unit = 0; out_unit < NUM_OUTPUTS; out_unit++){
+                computeError(output, labels[img], out_unit);
+            }
+
+            count++;
         }
 
-        System.out.println("\nLearning rate: " + train.ALPHA);
-        System.out.println("Number of training images: " + train.TRAIN_IMAGES);
-        System.out.println("Total epochs: " + train.MAX_ITER);
+        return correct;
 
-        train.writeWeights();
-        //System.out.println("Num correct: " + correct);
-       // System.out.println("Accuracy: " + ((double)correct/(MAX_ITER*train.TRAIN_IMAGES)*100)+ "%");
 
     }
 }
