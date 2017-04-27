@@ -8,7 +8,7 @@ public class NeuralNet{
     int NUM_LABELS = 11000;
     int MAX_ITER = 500;
     double STOP_ACCURACY = 0.95;
-    double ALPHA = .6; //learning rate (between 0-1)
+    double ALPHA = .07; //learning rate (between 0-1)
     double [][] images; //stores each pixel of each image
     double [][] weights = new double [NUM_OUTPUTS][NUM_PIXELS+1]; //each of the 10 outputs has a weight for each input pixel plus a bias weight
     int [] labels = new int[NUM_LABELS]; //correct labels of input images
@@ -177,12 +177,12 @@ public class NeuralNet{
             FileInputStream fis = new FileInputStream(weightsDir);
             DataInputStream dis = new DataInputStream(fis);
 
-            //read dimensions
-            // rows = dis.readInt();
-            // cols = dis.readInt();
+            //read dimensions from file
+            rows = dis.readInt();
+            cols = dis.readInt();
 
             //initialize weights array
-            //weights = new double[rows][cols];
+            weights = new double[rows][cols];
 
             //read weights
             for (int i = 0; i < rows; i++) {
