@@ -1,3 +1,6 @@
+import java.util.*;
+import java.io.*;
+
 public class Driver{
 
     public void train(){
@@ -5,11 +8,12 @@ public class Driver{
         int correct = 0;
         int iter = 0;
         double accuracy = 0;
+        File trainDir = new File("./train_images");
 
         System.out.println("\n====== TRAINING ======");
 
         //read from train directory and fill images[][] with pixels
-        train.parseImages();
+        train.parseImages(trainDir, train.TRAIN_IMAGES);
 
         //parse labels
         train.parseLabels();
@@ -19,7 +23,7 @@ public class Driver{
             correct = 0;
             accuracy = 0;
 
-            correct += train.trainNetwork();
+            correct = train.trainNetwork();
             accuracy = (double)correct/train.TRAIN_IMAGES;
             System.out.println("=== Epoch #" + iter + " ===");
             System.out.println("Accuracy: " + accuracy);
@@ -38,16 +42,15 @@ public class Driver{
         NeuralNet test = new NeuralNet();
         int correct = 0;
         double accuracy = 0;
+        File testDir = new File("./test_images");
 
         System.out.println("\n====== TESTING ======");
-        //read from train directory and fill images[][] with pixels
-        test.parseImages();
+
+        //read from test directory and fill images[][] with pixels
+        test.parseImages(testDir, test.TEST_IMAGES);
 
         //parse labels
         test.parseLabels();
-
-        //read in weights
-        test.readWeights();
 
         correct = test.testNetwork();
         accuracy = (double)correct/test.TRAIN_IMAGES;

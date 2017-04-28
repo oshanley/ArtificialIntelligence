@@ -3,10 +3,11 @@ import java.io.*;
 
 public class NeuralNet{
     int TRAIN_IMAGES = 10000;
+    int TEST_IMAGES = 1000;
     int NUM_PIXELS = 784;
     int NUM_OUTPUTS = 10;
     int NUM_LABELS = 11000;
-    int MAX_ITER = 500;
+    int MAX_ITER = 50;
     double STOP_ACCURACY = 0.95;
     double ALPHA = .07; //learning rate (between 0-1)
     double [][] images; //stores each pixel of each image
@@ -45,19 +46,18 @@ public class NeuralNet{
     }
 
     //description: for every image, parses and stores pixels normalized to values between 0 and 1
-    public void parseImages(){
-        images = new double [TRAIN_IMAGES][NUM_PIXELS+1];
+    public void parseImages(File dir, int numImgs){
+        images = new double [numImgs][NUM_PIXELS+1];
         int height, width;
         int count = 0;
 
-        File trainDir = new File("./train_images");
-        File[] trainImages = trainDir.listFiles();
+        File [] imgs = dir.listFiles();
 
         //read from the train_images folder
-        if (trainImages != null) {
+        if (dir != null) {
                 //for each image, read it in
-                for (File img : trainImages) {
-                    if(count == TRAIN_IMAGES){
+                for (File img : imgs) {
+                    if(count == numImgs){
                         // System.out.println("BREAK. Num imgs: " + images.length);
                         break;
                     }
@@ -188,7 +188,7 @@ public class NeuralNet{
             for (int i = 0; i < rows; i++) {
                 for (int j = 0; j < cols ; j++) {
                     weights[i][j] = dis.readDouble();
-                    // System.out.println("Reading weights[" + i + "][" + j + "]: " + weights[i][j]);
+                    //System.out.println("Reading weights[" + i + "][" + j + "]: " + weights[i][j]);
                 }
             }
 
@@ -231,6 +231,7 @@ public class NeuralNet{
         int correct = 0;
 
         for(int img = 0; img < TRAIN_IMAGES; img++){
+
             //compute output weights to determine output of network
             output = computeOutputs(images[img]);
 
@@ -257,7 +258,9 @@ public class NeuralNet{
         int count = 0;
         int correct = 0;
 
-        for(int img = 0; img < TRAIN_IMAGES; img++){
+        readWeights();
+
+        for(int img = 0; img < TEST_IMAGES; img++){
             //compute output weights to determine output of network
             output = computeOutputs(images[img]);
 
@@ -265,7 +268,6 @@ public class NeuralNet{
                 //System.out.println("CORRECT");
                 correct++;
             }
-
 
             //for each output unit of the network, compute the error
             for(int out_unit = 0; out_unit < NUM_OUTPUTS; out_unit++){
@@ -276,7 +278,5 @@ public class NeuralNet{
         }
 
         return correct;
-
-
     }
 }
