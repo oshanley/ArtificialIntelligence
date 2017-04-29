@@ -1,3 +1,12 @@
+/*
+Olivia Shanley
+Project III: Handwritten Digit Recognition
+CSC380 Artificial Intelligence
+
+Description: This file contains all of the functions necessary for performing the 3-nearest-neighbors classification of handwritten digits
+
+*/
+
   import java.util.*;
   import java.io.*;
 
@@ -245,6 +254,6 @@
         }
 
         accuracy = (double)num_correct/nn.TEST_IMAGES;
-        System.out.println("Accuracy: " + accuracy*100 + "%");
+        System.out.println("Accuracy: " + accuracy);
   }
 }

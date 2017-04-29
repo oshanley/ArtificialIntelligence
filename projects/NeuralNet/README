@@ -1,0 +1,24 @@
+Olivia Shanley
+Project III: Handwritten Digit Recognition
+CSC380 Artificial Intelligence
+Dr. Salgian
+
+What's what:
+
+    NeuralNet.java - Neural Network class; contains all the necessary functions for training and testing a network
+    Driver.java - Driver for the neural network; performs training of the network and testing
+    NearestNeighbor.java - Implements the 3-Nearest-Neighbor classifier
+
+    ./helperCode - reference code provided by Dr. Salgian to parse the images and labels; also contains a folder of jpg images of each handwritten digit
+    ./train_images - 10,000 images used for training
+    ./test_images - 1,000 images used for testing
+    labels.bin - labels for each image (11,000 total)
+
+How to use:
+
+    Run `make` to compile all files
+    To test the neural network, run `java Driver`
+    To test the 3-nearest-neighbors classifier, run `java NearestNeighbor`
+
+    To change number of training or testing images, as well as the learning rate for the neural network, etc, edit the global variables (TRAIN_IMAGES, TEST_IMAGES, ALPHA, etc) in NeuralNet.java
+    The same applies for the 3-nearest-neighbors classifier - edit the variables in NearestNeighbor.java

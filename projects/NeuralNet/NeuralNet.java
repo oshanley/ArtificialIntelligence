@@ -1,17 +1,26 @@
+/*
+Olivia Shanley
+Project III: Handwritten Digit Recognition
+CSC380 Artificial Intelligence
+
+Description: This file contains all of the functions necessary for training and testing a neural network.
+
+*/
+
 import java.util.*;
 import java.io.*;
 
 public class NeuralNet{
-    int TRAIN_IMAGES = 10000;
-    int TEST_IMAGES = 1000;
-    int NUM_PIXELS = 784;
-    int NUM_OUTPUTS = 10;
-    int NUM_LABELS = 11000;
-    int MAX_ITER = 200;
-    double STOP_ACCURACY = 0.95;
-    double ALPHA = 1; //learning rate (between 0-1)
-    double [][] images; //stores each pixel of each image
-    double [][] weights = new double [NUM_OUTPUTS][NUM_PIXELS+1]; //each of the 10 outputs has a weight for each input pixel plus a bias weight
+    int TRAIN_IMAGES = 10000;   //number of images to train the network on
+    int TEST_IMAGES = 1000;     //number of images to test the network on
+    int NUM_PIXELS = 784;       //number of pixels of each image
+    int NUM_OUTPUTS = 10;       //number of output units of the network
+    int NUM_LABELS = 11000;     //number of labels in labels.bin
+    int MAX_ITER = 200;         //maximum iterations of the data to be performed
+    double STOP_ACCURACY = 0.95;//stopping criteria based on the accuract of the network
+    double ALPHA = .3;          //learning rate (between 0-1)
+    double [][] images;         //array of images and all of their pixels
+    double [][] weights = new double [NUM_OUTPUTS][NUM_PIXELS+1]; //Array of weights for each output unit
     int [] labels = new int[NUM_LABELS]; //correct labels of input images
     double [] outputs = new double [NUM_OUTPUTS]; //output units of the network (g(in))
     double [] errors = new double[NUM_OUTPUTS]; //errors of each output unit
@@ -55,7 +64,7 @@ public class NeuralNet{
 
         //read from the train_images folder
         if (dir != null) {
-                //for each image, read it in
+                //for each image, read in its pixels
                 for (File img : imgs) {
                     if(count == numImgs){
                         break;
@@ -68,6 +77,7 @@ public class NeuralNet{
 
                     //read in each pixel
             	    for (int i=0; i < NUM_PIXELS+1; i++) {
+
                         //set bias weight
                         if(i == 0){
                             images[count][i] = -1;
@@ -113,7 +123,6 @@ public class NeuralNet{
             //update weight[i][j]
             for (int j = 0; j < NUM_PIXELS; j++) {
                 in += weights[i][j]*pixels[j];
-            //System.out.println("in += weights["+i+"]["+j+"]*pixels["+j+"]");
             }
 
             //apply sigmoid activation function
@@ -148,16 +157,14 @@ public class NeuralNet{
 
         //calculate the error
         errors[out_unit] = y - outputs[out_unit];
-        //System.out.println("Errors["+out_unit+"] = " + errors[out_unit]);
-
     }
 
     //description: traverses through weights and updates them
     public void updateWeights(int img){
         double gprime = 0;
 
-        for (int w = 0; w < NUM_OUTPUTS ; w++) {    //loop through output units
-            for (int i = 0; i < NUM_PIXELS+1; i++) { //loop through inputs
+        for (int w = 0; w < NUM_OUTPUTS ; w++) {
+            for (int i = 0; i < NUM_PIXELS+1; i++) {
                 gprime = outputs[w]*(1 - outputs[w]);
 
                 //update weight: W += Alpha*Error*gprime*weight
@@ -166,6 +173,7 @@ public class NeuralNet{
         }
     }
 
+    //for testing purposes; reads in weights calculated during training
     public void readWeights(){
         File weightsDir = new File("./weights.bin");
         int rows = 0;
@@ -186,7 +194,6 @@ public class NeuralNet{
             for (int i = 0; i < rows; i++) {
                 for (int j = 0; j < cols ; j++) {
                     weights[i][j] = dis.readDouble();
-                    //System.out.println("Reading weights[" + i + "][" + j + "]: " + weights[i][j]);
                 }
             }
 
@@ -198,6 +205,7 @@ public class NeuralNet{
         }
     }
 
+    //writes the weights of each output unit to a file to be used during testing
     public void writeWeights(){
         FileOutputStream fos = null;
         DataOutputStream dos = null;
@@ -213,7 +221,6 @@ public class NeuralNet{
             for (int i = 0; i < weights.length; i++) {
                 for (int j =0; j < weights[i].length ; j++) {
                     dos.writeDouble(weights[i][j]);
-                    //System.out.println("Writing weights[" + i + "][" + j + "]: " + weights[i][j]);
                 }
             }
 
@@ -221,61 +228,5 @@ public class NeuralNet{
         } catch (IOException e) {
             System.err.println("ERROR: unable to write weights to file");
         }
-    }
-
-    public int trainNetwork(){
-        int output = 0;
-        int count = 0;
-        int correct = 0;
-
-        for(int img = 0; img < TRAIN_IMAGES; img++){
-
-            //compute output weights to determine output of network
-            output = computeOutputs(images[img]);
-
-            if(output == labels[img]){
-                //System.out.println("CORRECT");
-                correct++;
-            }
-
-            //for each output unit of the network, compute the error
-            for(int out_unit = 0; out_unit < NUM_OUTPUTS; out_unit++){
-                computeError(output, labels[img], out_unit);
-            }
-
-            //update the weights
-            updateWeights(img);
-            count++;
-        }
-
-        return correct;
-    }
-
-    public int testNetwork(){
-        int output = 0;
-        int count = 0;
-        int correct = 0;
-
-        //read in weights
-        readWeights();
-
-        for(int img = 0; img < TEST_IMAGES; img++){
-            //compute output weights to determine output of network
-            output = computeOutputs(images[img]);
-
-            //check if decision is correct (offset by the training labels)
-            if(output == labels[10000 + img]){
-                correct++;
-            }
-
-            //for each output unit of the network, compute the error
-            for(int out_unit = 0; out_unit < NUM_OUTPUTS; out_unit++){
-                computeError(output, labels[img], out_unit);
-            }
-
-            count++;
-        }
-
-        return correct;
     }
 }
