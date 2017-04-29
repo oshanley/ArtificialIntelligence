@@ -53,7 +53,7 @@ public class Driver{
         test.parseLabels();
 
         correct = test.testNetwork();
-        accuracy = (double)correct/test.TRAIN_IMAGES;
+        accuracy = (double)correct/test.TEST_IMAGES;
 
         System.out.println("\nTest accuracy: " + accuracy);
     }

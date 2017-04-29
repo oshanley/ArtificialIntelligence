@@ -7,9 +7,9 @@ public class NeuralNet{
     int NUM_PIXELS = 784;
     int NUM_OUTPUTS = 10;
     int NUM_LABELS = 11000;
-    int MAX_ITER = 50;
+    int MAX_ITER = 200;
     double STOP_ACCURACY = 0.95;
-    double ALPHA = .07; //learning rate (between 0-1)
+    double ALPHA = 1; //learning rate (between 0-1)
     double [][] images; //stores each pixel of each image
     double [][] weights = new double [NUM_OUTPUTS][NUM_PIXELS+1]; //each of the 10 outputs has a weight for each input pixel plus a bias weight
     int [] labels = new int[NUM_LABELS]; //correct labels of input images
@@ -45,7 +45,7 @@ public class NeuralNet{
     	}
     }
 
-    //description: for every image, parses and stores pixels normalized to values between 0 and 1
+    //description: parses and stores pixels of images from a given directory normalized to values between 0 and 1
     public void parseImages(File dir, int numImgs){
         images = new double [numImgs][NUM_PIXELS+1];
         int height, width;
@@ -58,7 +58,6 @@ public class NeuralNet{
                 //for each image, read it in
                 for (File img : imgs) {
                     if(count == numImgs){
-                        // System.out.println("BREAK. Num imgs: " + images.length);
                         break;
                     }
                 try {
@@ -76,7 +75,6 @@ public class NeuralNet{
                         else {
                             //divide pixel values by 255 to normalize between 0 or 1
                             images[count][i] = ((double)dis.readInt())/255;
-                            //System.out.println("Images[" + count + "][" + i + "]: " + images[count][i]);
                         }
             	    }
             	    fis.close();
@@ -258,14 +256,15 @@ public class NeuralNet{
         int count = 0;
         int correct = 0;
 
+        //read in weights
         readWeights();
 
         for(int img = 0; img < TEST_IMAGES; img++){
             //compute output weights to determine output of network
             output = computeOutputs(images[img]);
 
-            if(output == labels[img]){
-                //System.out.println("CORRECT");
+            //check if decision is correct (offset by the training labels)
+            if(output == labels[10000 + img]){
                 correct++;
             }
 

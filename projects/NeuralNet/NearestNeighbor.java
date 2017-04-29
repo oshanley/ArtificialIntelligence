@@ -4,7 +4,7 @@
   public class NearestNeighbor{
     int K_NEIGHBORS = 3;
     int TRAIN_IMAGES = 10000;
-    int TEST_IMAGES = 20;
+    int TEST_IMAGES = 1000;
     int NUM_PIXELS = 784;
     int NUM_LABELS = 11000;
     double [] distances;
@@ -53,33 +53,31 @@
 
         //read from the train_images folder
         if (testImages != null) {
-                //for each image, read it in
-                for (File img : test) {
-                    if(count == TEST_IMAGES){
-                        // System.out.println("BREAK. Num imgs: " + images.length);
-                        break;
-                    }
+            //read each image in
+            for (File img : test) {
+                //only read in the number of test images
+                if(count == TEST_IMAGES){
+                    break;
+                }
                 try {
-                    FileInputStream fis = new FileInputStream(img);
-                    DataInputStream dis = new DataInputStream(fis);
+                  FileInputStream fis = new FileInputStream(img);
+                  DataInputStream dis = new DataInputStream(fis);
 
-                    //read dimensions from file
-                    height = dis.readInt();
-                    width = dis.readInt();
+                  //read dimensions from file
+                  height = dis.readInt();
+                  width = dis.readInt();
 
-                    //read in each pixel
-                    for (int i=0; i < NUM_PIXELS; i++) {
-                        //divide pixel values by 255 to normalize between 0 or 1
-                        testImages[count][i] = ((double)dis.readInt())/255;
-                      //   System.out.println("testImages[" + count + "][" + i + "]: " + testImages[count][i]);
-
-                    }
-                    fis.close();
-                    dis.close();
-                    count++;
+                  //read in each pixel
+                  for (int i=0; i < NUM_PIXELS; i++) {
+                      //divide pixel values by 255 to normalize between 0 or 1
+                      testImages[count][i] = ((double)dis.readInt())/255;
+                  }
+                  fis.close();
+                  dis.close();
+                  count++;
                 }
                 catch(IOException e) {
-                    System.err.println("Error reading files ");
+                  System.err.println("Error reading files ");
                 }
             }
         }
@@ -102,7 +100,6 @@
                 //for each image, read it in
                 for (File img : train) {
                     if(count == TRAIN_IMAGES){
-                        // System.out.println("BREAK. Num imgs: " + images.length);
                         break;
                     }
                 try {
@@ -117,8 +114,6 @@
                     for (int i=0; i < NUM_PIXELS; i++) {
                       //divide pixel values by 255 to normalize between 0 or 1
                         trainImages[count][i] = ((double)dis.readInt())/255;
-                      //   System.out.println("trainImages[" + count + "][" + i + "]: " + trainImages[count][i]);
-
                     }
                     fis.close();
                     dis.close();
@@ -146,10 +141,9 @@
       //loop through all training images
       for (int i = 0; i < TRAIN_IMAGES; i++) {
           for (int p = 0; p < NUM_PIXELS; p++) {
+              //calculate the Euclidean distance
               distances[i]+= Math.pow(Math.abs(trainImages[i][p] - pixels[p]),2);
-            //  System.out.println("distances[" + i + "]+= Math.pow(Math.abs(trainImages[" + i + "]["+ p + "] - pixels[" + p + "]),2)");
           }
-        // System.out.println("distances[" + i + "] = " + distances[i]);
       }
     }
 
@@ -158,54 +152,25 @@
       double min1 = (double)Integer.MAX_VALUE;
       double min2 = (double)Integer.MAX_VALUE;
       double min3 = (double)Integer.MAX_VALUE;
+      double[] mins = new double [K_NEIGHBORS];
 
-      /*
+      Arrays.fill(mins,(double)Integer.MAX_VALUE);
+
       for(int k = 0; k < K_NEIGHBORS; k++){
           //find mins
           for (int i = 0; i < distances.length; i++) {
               if (k == 0){
                   if (distances[i] < mins[k]){
                       mins[k] = distances[i];
-                      neighbors[k] = i;
+                      neighbors[k] = labels[i];
                   }
               }
-              else if (distances[i] < mins[k+1] && distances[i] > mins[k]){
+              else if (distances[i] < mins[k] && distances[i] > mins[k-1]){
                   mins[k] = distances[i];
-                  neighbors[k] = i;
+                  neighbors[k] = labels[i];
               }
           }
-          System.out.println("Mins["+k+"]: " + mins[k]);
       }
-      */
-
-      //find min1
-      for (int i = 0; i < distances.length; i++) {
-          if (distances[i] < min1){
-              min1 = distances[i];
-              neighbors[0] = i;
-          }
-      }
-
-      //find min2
-      for (int i = 0; i < distances.length; i++) {
-          if (distances[i] < min2 && distances[i] > min1){
-              min2 = distances[i];
-              neighbors[1] = i;
-          }
-      }
-
-       //find min3
-       for (int i = 0; i < distances.length; i++) {
-           if (distances[i] < min3 && distances[i] > min2){
-               min3 = distances[i];
-               neighbors[2] = i;
-           }
-       }
-
-      System.out.println("Min1 found at distances[" + neighbors[0] + "]: " + distances[neighbors[0]]);
-      System.out.println("Min2 found at distances[" + neighbors[1] + "]: " + distances[neighbors[1]]);
-      System.out.println("Min3 found at distances[" + neighbors[2] + "]: " + distances[neighbors[2]]);
-
     }
 
     public int vote(){
@@ -213,8 +178,7 @@
         int decision = 0;
 
         for (int i = 0; i < neighbors.length; i++) {
-            nums[i] = labels[neighbors[i]];
-            System.out.println("neighbors["+i+"]: " + nums[i]);
+            nums[i] = neighbors[i];
         }
 
         //if all 3 neighbors are the same
@@ -229,16 +193,16 @@
         return decision;
     }
 
+    //check if the decision was correct
     public boolean checkDecision(int decision, int img){
-      System.out.println("Decision: " + decision + ". Labels[" + (10000+img) +"]: " + labels[10000+img]);
+    //   System.out.println("Decision: " + decision + ". Labels[" + (10000+img) +"]: " + labels[10000+img]);
 
+      //offset labels by training images
       if (labels[10000 + img] == decision){
-        System.out.println("Correct");
-        return true;
+          return true;
       }
 
       return false;
-
     }
 
     public static void main(String[] args) {
@@ -266,7 +230,7 @@
             //calculate the distance between the pixels
             nn.calcDistance(pixels);
 
-            //find the closes neighbors
+            //find the closest neighbors to the image
             nn.findNeighbors();
 
             //vote on the neighbors
